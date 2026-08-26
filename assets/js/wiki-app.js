@@ -1,0 +1,589 @@
+/* PPWR WIKI — application (vanilla JS, file:// compatible) */
+"use strict";
+
+/* ---------------- helpers ---------------- */
+const $ = (s, r) => (r || document).querySelector(s);
+const $$ = (s, r) => Array.from((r || document).querySelectorAll(s));
+const esc = s => String(s == null ? "" : s).replace(/[&<>"']/g,
+  c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const norm = s => String(s || "").toLowerCase()
+  .normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+const debounce = (fn, ms) => { let t; return (...a) => { clearTimeout(t); t = setTimeout(() => fn(...a), ms); }; };
+
+const ICONS = {
+  menu: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 6h18M3 12h18M3 18h18"/></svg>',
+  sun: '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M4.9 4.9l1.4 1.4m11.4 11.4 1.4 1.4M2 12h2m16 0h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>',
+  moon: '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"/></svg>',
+  ext: '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M14 3h7v7M10 14 21 3M21 14v5a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5"/></svg>',
+  star: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="m12 2 3.1 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.8 21l1.2-6.8-5-4.9 6.9-1Z"/></svg>',
+  chev: '<span class="chev">▶</span>'
+};
+
+/* ---------------- i18n ---------------- */
+const T = {
+  fr: {
+    appName: "Wiki PPWR", appSub: "Règlement (UE) 2025/40", searchPh: "Rechercher un article, un mot-clé…",
+    home: "Accueil", tools: "Outils", related: "Textes liés", timeline: "Échéances réglementaires",
+    actors: "Vues métiers", glossary: "Glossaire", acts: "Suivi des actes délégués",
+    toc: "Sommaire", recitals: "Préambule — considérants", annexes: "Annexes",
+    officialText: "Texte officiel sur EUR-Lex", pdf: "PDF",
+    prev: "Précédent", next: "Suivant", favorites: "Favoris", noFav: "Aucun favori pour l'instant.",
+    results: "Résultats", noResults: "Aucun résultat", searchInDoc: "dans le texte",
+    chapters: "chapitres", articles: "articles", annexesN: "annexes", recitalsN: "considérants",
+    statusAdopted: "Adopté", statusInprogress: "En cours", statusExpected: "Attendu",
+    dueBy: "Échéance", baseArticle: "Article de base", type: "Type", note: "Note",
+    dutiesOf: "Obligations clés", backToActors: "Toutes les vues métiers",
+    quickAccess: "Accès rapide", keyDates: "Dates clés", repealedNote: "Directive abrogée par le règlement 2025/40 — conservée ici à titre de référence et de comparatif.",
+    actsDisclaimer: "Statuts indicatifs (dernière revue : août 2026) — à vérifier sur eur-lex.europa.eu.",
+    heroTitle: "PPWR — le wiki du paquet européen emballages",
+    heroSub: "Naviguez dans l'intégralité du règlement (UE) 2025/40 relatif aux emballages et aux déchets d'emballages, ainsi que les textes liés. Textes officiels complets, échéances, obligations par métier."
+  },
+  en: {
+    appName: "PPWR Wiki", appSub: "Regulation (EU) 2025/40", searchPh: "Search an article, keyword…",
+    home: "Home", tools: "Tools", related: "Related texts", timeline: "Regulatory deadlines",
+    actors: "Business views", glossary: "Glossary", acts: "Delegated acts tracker",
+    toc: "Table of contents", recitals: "Preamble — recitals", annexes: "Annexes",
+    officialText: "Official text on EUR-Lex", pdf: "PDF",
+    prev: "Previous", next: "Next", favorites: "Favourites", noFav: "No favourites yet.",
+    results: "Results", noResults: "No results", searchInDoc: "in the text",
+    chapters: "chapters", articles: "articles", annexesN: "annexes", recitalsN: "recitals",
+    statusAdopted: "Adopted", statusInprogress: "In progress", statusExpected: "Expected",
+    dueBy: "Due", baseArticle: "Base article", type: "Type", note: "Note",
+    dutiesOf: "Key obligations", backToActors: "All business views",
+    quickAccess: "Quick access", keyDates: "Key dates", repealedNote: "Directive repealed by Regulation 2025/40 — kept here for reference and comparison.",
+    actsDisclaimer: "Indicative statuses (last reviewed: Aug 2026) — verify on eur-lex.europa.eu.",
+    heroTitle: "EU Packaging Regulation — the PPWR wiki",
+    heroSub: "Browse the full text of Regulation (EU) 2025/40 on packaging and packaging waste, plus related texts. Complete official texts, deadlines, duties per business role."
+  }
+};
+const DOC_LABELS = {
+  fr: { ppwr: "Règlement (UE) 2025/40 — PPWR", sup: "Directive (UE) 2019/904 — SUP", d94: "Directive 94/62/CE (abrogée)" },
+  en: { ppwr: "Regulation (EU) 2025/40 — PPWR", sup: "Directive (EU) 2019/904 — SUP", d94: "Directive 94/62/EC (repealed)" }
+};
+
+/* ---------------- data access ---------------- */
+function getDoc(key, lang) {
+  if (key === "ppwr") return window.PPWR_DATA && window.PPWR_DATA[lang];
+  const arr = (window.PPWR_RELATED && window.PPWR_RELATED[lang]) || [];
+  return arr.find(d => d.kind === key);
+}
+function allArticles(doc) {
+  const out = [];
+  doc.chapters.forEach(c => c.articles.forEach(a => out.push({ ch: c, art: a })));
+  return out;
+}
+function flatSeq(doc) {
+  const seq = [];
+  allArticles(doc).forEach(x => seq.push({ type: "art", id: x.art.id, num: x.art.num, title: x.art.title }));
+  doc.annexes.forEach(a => seq.push({ type: "anx", id: a.id, num: a.num, title: a.title }));
+  return seq;
+}
+
+/* ---------------- favorites ---------------- */
+function favGet() { try { return JSON.parse(localStorage.getItem("ppwrwiki_fav") || "{}"); } catch (e) { return {}; } }
+function favToggle(key, meta) {
+  const f = favGet();
+  if (f[key]) delete f[key]; else f[key] = meta;
+  localStorage.setItem("ppwrwiki_fav", JSON.stringify(f));
+}
+function favHas(key) { return !!favGet()[key]; }
+
+/* ---------------- router ---------------- */
+let state = { lang: "fr", view: "home", doc: null, item: null };
+function parseHash() {
+  const h = location.hash.replace(/^#\/?/, "");
+  const seg = h.split("/").filter(Boolean);
+  let lang = seg[0] && /^[a-z]{2}$/.test(seg[0]) ? seg[0] : (localStorage.getItem("ppwrwiki_lang") || "fr");
+  if (!T[lang]) lang = "fr";
+  const view = seg[1] || "home";
+  return { lang, view, p1: decodeURIComponent(seg[2] || ""), p2: decodeURIComponent(seg[3] || "") };
+}
+
+/* ---------------- linkify legal cross-references ---------------- */
+function linkify(html, lang, curDoc) {
+  const docs = ["ppwr"];
+  const parts = String(html).split(/(<[^>]*>)/);
+  const wordArt = lang === "fr" ? "article" : "article";
+  const wordAnn = lang === "fr" ? "annexe" : "annex";
+  const artIds = new Set(allArticles(getDoc("ppwr", lang)).map(x => x.art.id));
+  const anxIds = new Set(getDoc("ppwr", lang).annexes.map(a => a.id.toLowerCase()));
+  const ROMAN = "[IVXLCDM]+";
+  const reArt = new RegExp("\\b(" + wordArt + "x?\\s+)(\\d{1,3})(\\s+(?:à|to|et|and)\\s+\\d{1,3})?(\\s+(?:bis|ter))?\\b", "gi");
+  const reAnx = new RegExp("\\b(" + wordAnn + "x?\\s+)(" + ROMAN + ")\\b", "gi");
+  return parts.map(p => {
+    if (p.startsWith("<")) return p;
+    p = p.replace(reArt, (m, pre, n, range, bis) => {
+      const id = "art_" + parseInt(n, 10);
+      if (!artIds.has(id)) return m;
+      const tail = (range || "") + (bis || "");
+      return pre + '<a href="#/' + lang + '/doc/ppwr/' + id + '" class="xref">' + n + "</a>" + tail;
+    });
+    p = p.replace(reAnx, (m, pre, rom) => {
+      const id = "anx_" + rom.toUpperCase();
+      if (!anxIds.has(id.toLowerCase())) return m;
+      return pre + '<a href="#/' + lang + '/doc/ppwr/' + id + '" class="xref">' + rom + "</a>";
+    });
+    return p;
+  }).join("");
+}
+
+/* ---------------- sidebar ---------------- */
+function buildSidebar(route) {
+  const L = T[route.lang];
+  const sb = $("#sb-nav");
+  const cur = route.lang + "/" + route.view + "/" + route.p1 + "/" + route.p2;
+  const link = (label, href, match) =>
+    '<a class="tree-link' + (cur === match ? " active" : "") + '" href="' + href + '">' + esc(label) + "</a>";
+
+  function docTree(key, label) {
+    const doc = getDoc(key, route.lang);
+    if (!doc) return "";
+    let h = '<div class="tree-item"><button class="tree-btn">' + esc(label) + ICONS.chev + "</button><div class=\"tree-sub\">";
+    h += link(L.toc, "#/" + route.lang + "/doc/" + key + "/toc", route.lang + "/doc/" + key + "/toc//");
+    h += link(L.recitals, "#/" + route.lang + "/doc/" + key + "/recitals", route.lang + "/doc/" + key + "/recitals//");
+    doc.chapters.forEach((c, ci) => {
+      if (!c.articles.length && !c.label && !c.title) return;
+      let sub = '<div class="tree-item"><button class="tree-btn">' +
+        esc(c.label ? c.label + " — " : "") + esc(c.title || ("[" + (ci + 1) + "]")) + ICONS.chev +
+        '</button><div class="tree-sub">';
+      c.articles.forEach(a => {
+        const match = route.lang + "/doc/" + key + "/" + a.id + "//";
+        sub += link((a.num || a.id) + (a.title ? " · " + a.title : ""), "#/" + route.lang + "/doc/" + key + "/" + a.id, match);
+      });
+      sub += "</div></div>";
+      h += sub;
+    });
+    if (doc.annexes.length) {
+      h += '<div class="tree-item"><button class="tree-btn">' + esc(L.annexes) + ICONS.chev + '</button><div class="tree-sub">';
+      doc.annexes.forEach(a => {
+        const name = (a.num || a.id) + (a.title ? " · " + a.title : "");
+        h += link(name, "#/" + route.lang + "/doc/" + key + "/" + a.id, route.lang + "/doc/" + key + "/" + a.id + "//");
+      });
+      h += "</div></div>";
+    }
+    return h + "</div></div>";
+  }
+
+  function toolTree() {
+    const meta = window.PPWR_META[route.lang];
+    let h = '<div class="tree-item"><button class="tree-btn">' + esc(L.tools) + ICONS.chev + '</button><div class="tree-sub">';
+    h += link(L.timeline, "#/" + route.lang + "/timeline", route.lang + "/timeline///");
+    h += '<div class="tree-item"><button class="tree-btn">' + esc(L.actors) + ICONS.chev + '</button><div class="tree-sub">';
+    meta.actors.forEach(a => {
+      h += link(a.name, "#/" + route.lang + "/actor/" + a.id, route.lang + "/actor/" + a.id + "//");
+    });
+    h += "</div></div>";
+    h += link(L.glossary, "#/" + route.lang + "/glossary", route.lang + "/glossary///");
+    h += link(L.acts, "#/" + route.lang + "/acts", route.lang + "/acts///");
+    return h + "</div></div>";
+  }
+
+  const fav = favGet();
+  const favKeys = Object.keys(fav);
+
+  let h = "";
+  h += link(L.home, "#/" + route.lang + "/home", route.lang + "/home///");
+  h += '<div class="tree-group-label">' + esc(DOC_LABELS[route.lang].ppwr) + "</div>";
+  h += docTree("ppwr", DOC_LABELS[route.lang].ppwr);
+  h += '<div class="tree-group-label">' + esc(L.related) + "</div>";
+  h += docTree("sup", DOC_LABELS[route.lang].sup);
+  h += docTree("d94", DOC_LABELS[route.lang].d94);
+  h += '<div class="tree-group-label">' + esc(L.tools) + "</div>";
+  h += toolTree();
+  if (favKeys.length) {
+    h += '<div class="tree-group-label">★ ' + esc(L.favorites) + "</div>";
+    favKeys.forEach(k => {
+      const segs = k.split("|");
+      const dk = segs[0], idk = segs[1];
+      h += link(fav[k].t || idk, "#/" + route.lang + "/doc/" + dk + "/" + idk, "__fav_" + k);
+    });
+  }
+  sb.innerHTML = h;
+
+  // expandable behavior
+  $$(".tree-btn", sb).forEach(btn => {
+    btn.addEventListener("click", () => btn.parentElement.classList.toggle("open"));
+  });
+  // auto-open path to current item
+  const act = $(".tree-link.active", sb);
+  if (act) {
+    let node = act.parentElement;
+    while (node && node.classList) {
+      if (node.classList.contains("tree-item")) node.classList.add("open");
+      node = node.parentElement;
+    }
+  }
+}
+
+/* ---------------- views ---------------- */
+function vHome(r) {
+  const L = T[r.lang], meta = window.PPWR_META[r.lang], doc = getDoc("ppwr", r.lang);
+  const nArt = allArticles(doc).length;
+  const upcoming = meta.timeline.filter(t => new Date(t.date) >= new Date()).slice(0, 3);
+  const pastOrNext = upcoming.length ? upcoming : meta.timeline.slice(-3);
+  return `
+  <section class="hero">
+    <h1>${esc(L.heroTitle)}</h1>
+    <p>${esc(L.heroSub)}</p>
+    <div class="chips">
+      <span class="chip">CELEX 32025R0040</span>
+      <span class="chip">${r.lang === "fr" ? "Applicable" : "Applies"} : 12/08/2026</span>
+      <span class="chip">FR · EN</span>
+      <span class="chip">${r.lang === "fr" ? "Texte intégral" : "Full text"}</span>
+    </div>
+  </section>
+  <div class="grid cols-3">
+    ${statCard(doc.chapters.length, L.chapters)}
+    ${statCard(nArt, L.articles)}
+    ${statCard(doc.annexes.length, L.annexesN)}
+    ${statCard(doc.recitals.length, L.recitalsN)}
+  </div>
+  <h2 class="sec-title">${esc(L.quickAccess)}</h2>
+  <div class="grid cols-2">
+    ${actorCardsShort(r)}
+  </div>
+  <h2 class="sec-title">${esc(L.keyDates)}</h2>
+  ${pastOrNext.map(tlItemHtml.bind(null, r)).join("")}`;
+}
+function statCard(n, lbl) {
+  return `<div class="stat-card"><div class="stat-num">${n}</div><div class="stat-lbl">${esc(lbl)}</div></div>`;
+}
+function actorCardsShort(r) {
+  const meta = window.PPWR_META[r.lang];
+  return meta.actors.map(a => `
+    <div class="actor-card" onclick="location.hash='#/${r.lang}/actor/${a.id}'">
+      <div class="actor-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.6-7 8-7s8 3 8 7"/></svg></div>
+      <div><div class="actor-name">${esc(a.name)}</div><div class="actor-sum">${esc(a.summary)}</div></div>
+    </div>`).join("");
+}
+function tlItemHtml(r, t) {
+  const L = T[r.lang];
+  const items = (t.items || []).map(it =>
+    `<li>${linkified(it[0], r)} <a class="xref" href="#/${r.lang}/doc/ppwr/${it[1]}">[${it[1].replace("art_", "art. ")}]</a></li>`).join("");
+  const refs = (t.refs || []).map(x =>
+    `<a class="badge blue" style="text-decoration:none;margin-right:6px" href="#/${r.lang}/doc/ppwr/${x}">${x.replace("art_", "art. ")}</a>`).join("");
+  const d = t.date.split("-");
+  return `<div class="tl-item${t.major ? " major" : ""}">
+    <span class="tl-dot"></span>
+    <div class="tl-date">${d[2]}/${d[1]}/${d[0]}</div>
+    <div class="tl-card">
+      <div class="tl-title">${esc(t.title)}</div>
+      ${t.desc ? `<div class="tl-desc">${linkified(t.desc, r)}</div>` : ""}
+      ${items ? `<ul class="tl-items">${items}</ul>` : ""}
+      ${refs ? `<div style="margin-top:8px">${refs}</div>` : ""}
+    </div></div>`;
+}
+function linkified(text, r) { return linkify(esc(text), r.lang); }
+
+function vTimeline(r) {
+  const L = T[r.lang];
+  const items = window.PPWR_META[r.lang].timeline;
+  return `<h2 class="sec-title">${esc(L.timeline)}</h2>
+  <div class="card"><div class="card-body"><div class="tl">${items.map(t => tlItemHtml(r, t)).join("")}</div></div></div>`;
+}
+
+function vActors(r) {
+  const L = T[r.lang];
+  return `<h2 class="sec-title">${esc(L.actors)}</h2>
+  <div class="grid cols-2">${actorCardsShort(r)}</div>`;
+}
+function vActor(r, id) {
+  const L = T[r.lang], meta = window.PPWR_META[r.lang];
+  const a = meta.actors.find(x => x.id === id);
+  if (!a) return emptyView();
+  const duties = a.duties.map(d => `<div class="duty"><span class="duty-ref"><a class="badge gray" style="text-decoration:none" href="#/${r.lang}/doc/ppwr/${d[1]}">${d[1].replace("art_", "art. ")}</a></span><span>${linkify(esc(d[0]), r.lang)}</span></div>`).join("");
+  return `<div class="crumbs-page"><a href="#/${r.lang}/actors">${esc(L.backToActors)}</a></div>
+  <h2 class="sec-title">${esc(a.name)}</h2>
+  <div class="card"><div class="card-head"><span class="badge blue">${esc(L.dutiesOf)}</span></div>
+  <div class="card-body">${duties}</div></div>`;
+}
+
+function vGlossary(r) {
+  const L = T[r.lang], g = window.PPWR_META[r.lang].glossary;
+  return `<h2 class="sec-title">${esc(L.glossary)}</h2>
+  <div class="grid cols-2">${g.map(x => `
+    <div class="card" style="margin:0"><div class="card-body" style="padding:16px 18px">
+      <div class="gloss-term">${esc(x[0])}</div>
+      <div class="gloss-def">${linkify(esc(x[1]), r.lang)}</div>
+      <div style="margin-top:8px"><a class="badge gray" style="text-decoration:none" href="#/${r.lang}/doc/ppwr/${x[2]}">${x[2].replace("art_", "art. ")}</a></div>
+    </div></div>`).join("")}</div>`;
+}
+
+function vActs(r) {
+  const L = T[r.lang], acts = window.PPWR_META[r.lang].acts;
+  const badge = s => s === "adopted" ? '<span class="badge green">' + esc(L.statusAdopted) + "</span>"
+    : s === "inprogress" ? '<span class="badge amber">' + esc(L.statusInprogress) + "</span>"
+      : '<span class="badge gray">' + esc(L.statusExpected) + "</span>";
+  return `<h2 class="sec-title">${esc(L.acts)}</h2>
+  <p style="color:var(--text-2);font-size:13px;margin-bottom:14px">${esc(L.actsDisclaimer)}</p>
+  ${acts.map(a => `<div class="card"><div class="card-body" style="padding:16px 20px">
+    <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+      <b>${esc(a.topic)}</b> ${badge(a.status)}
+    </div>
+    <div style="display:flex;gap:16px;flex-wrap:wrap;font-size:12.5px;color:var(--text-2);margin-top:8px">
+      <span>${esc(L.type)} : <b>${esc(a.type)}</b></span>
+      ${a.due ? `<span>${esc(L.dueBy)} : <b>${a.due.split("-").reverse().join("/")}</b></span>` : ""}
+      <span>${esc(L.baseArticle)} : <a href="#/${r.lang}/doc/ppwr/${a.base}">${a.base.replace("art_", "art. ")}</a></span>
+    </div>
+    <div style="font-size:13px;color:var(--text-2);margin-top:6px">${esc(a.note)}</div>
+  </div></div>`).join("")}`;
+}
+
+function vToc(r, key) {
+  const doc = getDoc(key, r.lang), L = T[r.lang];
+  const head = docHead(r, key, doc, L.toc);
+  let body = "";
+  doc.chapters.forEach(c => {
+    body += `<h2 class="sec-title">${esc(c.label)}${c.title ? " — " + esc(c.title) : ""}</h2>`;
+    c.sections.forEach(s => { if (s.label || s.title) body += `<div style="color:var(--text-muted);font-size:12px;text-transform:uppercase;letter-spacing:.08em;margin:10px 0 2px">${esc(s.label)} ${esc(s.title)}</div>`; });
+    c.articles.forEach(a => {
+      body += `<div class="card" style="margin-bottom:10px"><a style="text-decoration:none;color:inherit" href="#/${r.lang}/doc/${key}/${a.id}">
+      <div class="card-body" style="padding:12px 18px;display:flex;gap:10px;align-items:baseline">
+        <span class="art-num" style="white-space:nowrap">${esc(a.num || a.id)}</span>
+        <span style="font-weight:600">${esc(a.title || "")}</span>
+      </div></a></div>`;
+    });
+  });
+  if (doc.annexes.length) {
+    body += `<h2 class="sec-title">${esc(L.annexes)}</h2>`;
+    doc.annexes.forEach(a => {
+      body += `<div class="card" style="margin-bottom:10px"><a style="text-decoration:none;color:inherit" href="#/${r.lang}/doc/${key}/${a.id}">
+      <div class="card-body" style="padding:12px 18px;display:flex;gap:10px;align-items:baseline">
+        <span class="art-num" style="white-space:nowrap">${esc(a.num || a.id)}</span>
+        <span style="font-weight:600">${esc(a.title || "")}</span>
+      </div></a></div>`;
+    });
+  }
+  return head + body;
+}
+
+function vRecitals(r, key) {
+  const doc = getDoc(key, r.lang), L = T[r.lang];
+  const head = docHead(r, key, doc, L.recitals);
+  const list = doc.recitals.map(rc =>
+    `<div class="recital"><span class="recital-n">${esc(rc.n)}</span><div>${linkify(rc.html, r.lang)}</div></div>`).join("");
+  return head + `<div class="card"><div class="card-body">${list}</div></div>`;
+}
+
+function docHead(r, key, doc, crumbLabel) {
+  const L = T[r.lang];
+  const note = key === "d94" ? `<p style="color:var(--ifs-coral);font-size:13px;margin-top:8px">${esc(L.repealedNote)}</p>` : "";
+  return `<div class="card"><div class="card-body">
+    <div class="doc-meta">
+      <span class="badge blue">${esc(DOC_LABELS[r.lang][key])}</span>
+      <span class="badge gray">CELEX ${esc(doc.celex)}</span>
+      <a class="extlink" target="_blank" rel="noopener" href="${esc(doc.url)}">${ICONS.ext} ${esc(L.officialText)}</a>
+      <a class="extlink" target="_blank" rel="noopener" href="${esc(doc.pdf)}">${ICONS.ext} PDF</a>
+    </div>
+    <h1 style="font-size:19px;font-weight:800;margin-top:10px;line-height:1.35">${esc(doc.title)}</h1>
+    ${note}
+  </div></div>`;
+}
+
+function vItem(r, key, id) {
+  const doc = getDoc(key, r.lang), L = T[r.lang];
+  const isAnx = /^anx/i.test(id);
+  if (id === "toc") return vToc(r, key);
+  if (id === "recitals") return vRecitals(r, key);
+  const seq = flatSeq(doc);
+  const idx = seq.findIndex(s => s.id.toLowerCase() === id.toLowerCase());
+  if (idx < 0) return emptyView();
+  const cur = seq[idx];
+  const prev = seq[idx - 1], next = seq[idx + 1];
+
+  let inner = "", title = "", subtitle = "";
+  if (cur.type === "art") {
+    const found = (() => {
+      for (const c of doc.chapters) { const a = c.articles.find(x => x.id === cur.id); if (a) return { a, c }; }
+      return {};
+    })();
+    const a = found.a || {}, ch = found.c || {};
+    title = a.num || cur.id; subtitle = a.title || "";
+    inner = (a.blocks || []).map(b => b.t === "note"
+      ? `<div class="oj-note-block">${linkify(b.html, r.lang)}</div>`
+      : `<div class="prov">${linkify(b.html, r.lang)}</div>`).join("")
+      || `<div class="empty">${esc("(—)")}</div>`;
+    if (ch.label || ch.title) {
+      inner = `<div style="font-size:12px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px">${esc(ch.label)} ${esc(ch.title)}</div>` + inner;
+    }
+    if (a.section) {
+      inner = `<div style="font-size:12px;color:var(--ifs-purple);margin-bottom:4px">${esc(a.section)}</div>` + inner;
+    }
+  } else {
+    const a = doc.annexes.find(x => x.id === cur.id) || {};
+    title = a.num || cur.id; subtitle = a.title || "";
+    inner = `<div class="prov">${linkify(a.html || "", r.lang)}</div>`;
+  }
+
+  const favKey = key + "|" + cur.id;
+  const starred = favHas(favKey);
+  const pager = (prev || next) ? `<div class="pager">
+    ${prev ? `<a href="#/${r.lang}/doc/${key}/${prev.id}"><div class="dir">◀ ${esc(L.prev)}</div><div class="lbl">${esc(prev.num)} ${esc(prev.title || "")}</div></a>` : "<span></span>"}
+    ${next ? `<a class="next" href="#/${r.lang}/doc/${key}/${next.id}"><div class="dir">${esc(L.next)} ▶</div><div class="lbl">${esc(next.num)} ${esc(next.title || "")}</div></a>` : ""}
+  </div>` : "";
+
+  return `${docHead(r, key, doc, title)}
+  <div class="card"><div class="card-head">
+    <h2><span class="art-num">${esc(title)}</span> ${esc(subtitle)}</h2>
+    <span class="topbar-spacer"></span>
+    <button class="icon-btn" id="favBtn" title="${esc(L.favorites)}" style="${starred ? "color:var(--ifs-amber);border-color:var(--ifs-amber)" : ""}">${ICONS.star}</button>
+  </div>
+  <div class="card-body" id="itemBody">${inner}</div></div>
+  ${pager}`;
+}
+
+function emptyView() { return '<div class="empty">404</div>'; }
+
+/* ---------------- search ---------------- */
+let INDEX = { lang: null, entries: [] };
+function buildIndex(lang) {
+  if (INDEX.lang === lang) return INDEX.entries;
+  const entries = [];
+  const push = (docKey, type, id, label, html) => {
+    const text = norm(String(html || "").replace(/<[^>]*>/g, " ").replace(/\s+/g, " "));
+    entries.push({ docKey, type, id, label, text });
+  };
+  ["ppwr", "sup", "d94"].forEach(k => {
+    const doc = getDoc(k, lang);
+    if (!doc) return;
+    allArticles(doc).forEach(({ art }) =>
+      push(k, "art", art.id, (art.num || art.id) + (art.title ? " · " + art.title : ""),
+        (art.num + " " + art.title + " " + (art.blocks || []).map(b => b.html).join(" "))));
+    doc.annexes.forEach(a => push(k, "anx", a.id, (a.num || a.id) + " · " + (a.title || ""), a.num + " " + a.title + " " + (a.html || "")));
+    doc.recitals.forEach(rc => push(k, "rec", rc.n, DOC_LABELS[lang][k] + " — considérant/recital " + rc.n, rc.html));
+  });
+  window.PPWR_META[lang].glossary.forEach(g =>
+    entries.push({ docKey: "_meta", type: "gloss", id: g[2], label: "📖 " + g[0], text: norm(g[0] + " " + g[1]) }));
+  INDEX = { lang, entries };
+  return entries;
+}
+function doSearch(q, lang) {
+  q = norm(q).trim();
+  const panel = $("#searchPanel");
+  if (q.length < 2) { panel.hidden = true; panel.innerHTML = ""; return; }
+  const entries = buildIndex(lang);
+  const scored = [];
+  for (const e of entries) {
+    const idx = e.text.indexOf(q);
+    if (idx >= 0) scored.push({ e, pos: idx, count: e.text.split(q).length - 1 });
+    else {
+      const words = q.split(/\s+/).filter(Boolean);
+      if (words.length > 1 && words.every(w => e.text.includes(w)))
+        scored.push({ e, pos: e.text.indexOf(words[0]), count: 1 });
+    }
+  }
+  scored.sort((a, b) => (b.e.label.startsWith("📖") - a.e.label.startsWith("📖")) || b.count - a.count || a.pos - b.pos);
+  const top = scored.slice(0, 25);
+  const L = T[lang];
+  panel.innerHTML = top.length
+    ? `<div class="tree-group-label" style="padding:6px 10px 2px">${top.length} ${esc(L.results)}</div>` + top.map(s => {
+      const snippet = s.e.text.substr(Math.max(0, s.pos - 60), 150);
+      const hl = esc(snippet).replace(new RegExp("(" + q.split(/\s+/).map(w => w.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).join("|") + ")", "gi"), "<mark>$1</mark>");
+      const href = s.e.docKey === "_meta"
+        ? "#/" + lang + "/glossary"
+        : "#/" + lang + "/doc/" + s.e.docKey + "/" + (s.e.type === "rec" ? "recitals" : s.e.id);
+      return `<a class="search-hit" href="${href}" onclick="document.getElementById('searchPanel').hidden=true">
+        <div style="font-weight:700;font-size:13px">${hlMark(esc(s.e.label), q)}</div>
+        <div style="font-size:12px;color:var(--text-muted);overflow:hidden;max-height:34px">…${hl}…</div></a>`;
+    }).join("")
+    : `<div style="padding:14px;color:var(--text-muted);font-size:13px">${esc(L.noResults)}</div>`;
+  panel.hidden = false;
+}
+function hlMark(label, q) {
+  const w = q.split(/\s+/)[0];
+  if (!w) return label;
+  return label.replace(new RegExp("(" + w.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") + ")", "gi"), "<mark>$1</mark>");
+}
+
+/* ---------------- render root ---------------- */
+function render() {
+  const r = parseHash();
+  state = { ...state, ...r };
+  localStorage.setItem("ppwrwiki_lang", r.lang);
+  document.documentElement.setAttribute("data-theme", localStorage.getItem("ppwrwiki_theme") || "light");
+
+  $("#sb-appname").textContent = T[r.lang].appName;
+  $("#sb-appsub").textContent = T[r.lang].appSub;
+  $("#q").placeholder = T[r.lang].searchPh;
+  $("#btnFr").classList.toggle("on", r.lang === "fr");
+  $("#btnEn").classList.toggle("on", r.lang === "en");
+
+  let html = "";
+  switch (r.view) {
+    case "timeline": html = vTimeline(r); break;
+    case "actors": html = vActors(r); break;
+    case "actor": html = vActor(r, r.p1); break;
+    case "glossary": html = vGlossary(r); break;
+    case "acts": html = vActs(r); break;
+    case "doc": html = vItem(r, r.p1, r.p2 || "toc"); break;
+    default: html = vHome(r);
+  }
+  const content = $("#content");
+  content.innerHTML = html;
+  content.scrollTop = 0;
+  window.scrollTo(0, 0);
+
+  // crumbs
+  const crumbs = [`<a href="#/${r.lang}/home">${esc(T[r.lang].home)}</a>`];
+  if (r.view === "doc" && r.p1) {
+    crumbs.push(`<a href="#/${r.lang}/doc/${r.p1}/toc">${esc(DOC_LABELS[r.lang][r.p1] || r.p1)}</a>`);
+    if (r.p2 && r.p2 !== "toc") {
+      const doc = getDoc(r.p1, r.lang);
+      const seq = flatSeq(doc);
+      const it = seq.find(s => s.id.toLowerCase() === r.p2.toLowerCase());
+      if (it) crumbs.push(`<b>${esc(it.num || it.id)}${it.title ? " · " + esc(it.title) : ""}</b>`);
+    }
+  } else if (r.view !== "home") {
+    const lbl = { timeline: T[r.lang].timeline, actors: T[r.lang].actors, actor: T[r.lang].actors, glossary: T[r.lang].glossary, acts: T[r.lang].acts }[r.view];
+    crumbs.push(`<b>${esc(lbl || r.view)}</b>`);
+  }
+  $("#crumbs").innerHTML = crumbs.join('<span>›</span>');
+
+  buildSidebar(r);
+
+  // favorite button binding
+  const fb = $("#favBtn");
+  if (fb) {
+    fb.addEventListener("click", () => {
+      const doc = r.p1, id = r.p2;
+      const seq = flatSeq(getDoc(doc, r.lang));
+      const it = seq.find(s => s.id.toLowerCase() === id.toLowerCase());
+      favToggle(doc + "|" + id, { t: (it ? it.num + " " + (it.title || "") : id) });
+      render();
+    });
+  }
+  document.body.classList.remove("nav-open");
+}
+
+/* ---------------- boot ---------------- */
+window.addEventListener("hashchange", render);
+document.addEventListener("DOMContentLoaded", () => {
+  $("#btnNav").innerHTML = ICONS.menu;
+  $("#btnTheme").innerHTML = (localStorage.getItem("ppwrwiki_theme") || "light") === "dark" ? ICONS.sun : ICONS.moon;
+  $("#btnTheme").addEventListener("click", () => {
+    const cur = localStorage.getItem("ppwrwiki_theme") || "light";
+    const nxt = cur === "dark" ? "light" : "dark";
+    localStorage.setItem("ppwrwiki_theme", nxt);
+    document.documentElement.setAttribute("data-theme", nxt);
+    $("#btnTheme").innerHTML = nxt === "dark" ? ICONS.sun : ICONS.moon;
+  });
+  $("#btnNav").addEventListener("click", () => {
+    if (innerWidth <= 900) document.body.classList.toggle("nav-open");
+    else document.body.classList.toggle("nav-collapsed");
+  });
+  $("#scrim").addEventListener("click", () => document.body.classList.remove("nav-open"));
+  $("#btnFr").addEventListener("click", () => {
+    const seg = location.hash.replace(/^#\//, "").split("/");
+    seg[0] = "fr"; location.hash = "#/" + seg.join("/");
+  });
+  $("#btnEn").addEventListener("click", () => {
+    const seg = location.hash.replace(/^#\//, "").split("/");
+    seg[0] = "en"; location.hash = "#/" + seg.join("/");
+  });
+  $("#q").addEventListener("input", debounce(e => doSearch(e.target.value, parseHash().lang), 140));
+  document.addEventListener("click", e => {
+    if (!$("#searchWrap").contains(e.target)) $("#searchPanel").hidden = true;
+  });
+  if (!location.hash) location.hash = "#/" + (localStorage.getItem("ppwrwiki_lang") || "fr") + "/home";
+  render();
+});

@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="fr" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Wiki PPWR — Règlement (UE) 2025/40</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/wiki.css">
+</head>
+<body>
+<div class="app">
+  <aside class="sidebar">
+    <div class="sb-head">
+      <div class="sb-logo">P</div>
+      <div>
+        <div class="sb-title" id="sb-appname">Wiki PPWR</div>
+        <div class="sb-sub" id="sb-appsub">Règlement (UE) 2025/40</div>
+      </div>
+    </div>
+    <div class="sb-search" id="searchWrap">
+      <input type="search" id="q" placeholder="Rechercher…" autocomplete="off" spellcheck="false">
+      <div id="searchPanel" hidden></div>
+    </div>
+    <nav class="sb-nav" id="sb-nav"></nav>
+    <div class="sb-foot">Sources : EUR-Lex / CELLAR · CELEX 32025R0040<br>Wiki généré — août 2026</div>
+  </aside>
+  <div class="scrim" id="scrim"></div>
+
+  <div class="main">
+    <header class="topbar">
+      <button class="icon-btn hamburger" id="btnNav" aria-label="Menu"></button>
+      <nav class="crumbs" id="crumbs"></nav>
+      <span class="topbar-spacer"></span>
+      <div class="lang-switch">
+        <button id="btnFr" class="on">FR</button><button id="btnEn">EN</button>
+      </div>
+      <button class="icon-btn" id="btnTheme" aria-label="Theme"></button>
+    </header>
+    <main class="content" id="content"></main>
+  </div>
+</div>
+
+<script src="data/ppwr-fr.js"></script>
+<script src="data/ppwr-en.js"></script>
+<script src="data/related-fr.js"></script>
+<script src="data/related-en.js"></script>
+<script src="data/meta.js"></script>
+<script src="assets/js/wiki-app.js"></script>
+</body>
+</html>
