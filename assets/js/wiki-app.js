@@ -402,10 +402,25 @@ function bindRegister(r) {
       if (entry) {
         const fields = entry.fields || {};
         const name = fields.fcmCompanyName || fields.fcmRecyclingFacilityName || fields.fcmRecyclingInstallationName || "";
-        const country = fields.fcmHoCountryName || fields.fcmRfCountry || "";
+        const address = fields.fcmHoAddress || fields.fcmRfAddress || "";
+        const country = fields.fcmHoCountryName || fields.fcmHoCountry || fields.fcmRfCountry || "";
+        const status = fields.fcmRonRegistrationStatus || fields.fcmRfnRegistrationStatus || fields.fcmRinRegistrationStatus || fields.policyItemStatus || "";
+        const statusLabel = status === "FCMRS_INACTIVE" ? (fr ? "Inactif" : "Inactive") : status === "PUBLISHED" ? (fr ? "Publié" : "Published") : status;
+        const location = [address, country].filter(Boolean).join(", ");
+        const mapUrl = "https://www.openstreetmap.org/search?query=" + encodeURIComponent(location || name);
+        const webSearchUrl = "https://www.google.com/search?q=" + encodeURIComponent(name + (country ? " " + country : ""));
         message.className = "register-message success";
         message.textContent = fr ? "Référence trouvée dans l’index officiel." : "Reference found in the official index.";
-        result.innerHTML = `<strong>${fr ? `Référence ${kind} trouvée : ${esc(number)}` : `${kind} reference found: ${esc(number)}`}</strong><p>${esc([name, country].filter(Boolean).join(" · ") || (fr ? "La fiche existe dans le registre." : "The record exists in the register."))}</p><small>${fr ? `Index synchronisé le ${esc(index.generatedAt || "")}. Vérifiez la fiche FIP pour le détail complet.` : `Index synchronised on ${esc(index.generatedAt || "")}. Open FIP for full details.`}</small><p><a class="btn-primary" target="_blank" rel="noopener" href="${urls[kind]}">${ICONS.ext} ${fr ? "Ouvrir la fiche officielle" : "Open the official record"}</a></p>`;
+        result.innerHTML = `<strong>${fr ? `Référence ${kind} trouvée : ${esc(number)}` : `${kind} reference found: ${esc(number)}`}</strong>
+          <div class="register-detail-grid">
+            ${name ? `<div><span>${fr ? "Entité" : "Entity"}</span><b>${esc(name)}</b></div>` : ""}
+            ${statusLabel ? `<div><span>${fr ? "Statut dans le registre" : "Register status"}</span><b>${esc(statusLabel)}</b></div>` : ""}
+            ${address ? `<div><span>${fr ? "Adresse déclarée" : "Registered address"}</span><b>${esc(address)}</b></div>` : ""}
+            ${fields.fcmRfn && kind !== "RFN" ? `<div><span>RFN</span><b>${esc(fields.fcmRfn)}</b></div>` : ""}
+            ${fields.fcmRin && kind !== "RIN" ? `<div><span>RIN</span><b>${esc(fields.fcmRin)}</b></div>` : ""}
+          </div>
+          <small>${fr ? `Index synchronisé le ${esc(index.generatedAt || "")}. Les liens externes sont des aides de recherche et ne constituent pas une preuve réglementaire.` : `Index synchronised on ${esc(index.generatedAt || "")}. External links are search aids and are not regulatory evidence.`}</small>
+          <div class="register-actions"><a class="btn-primary" target="_blank" rel="noopener" href="${urls[kind]}">${ICONS.ext} ${fr ? "Fiche officielle FIP" : "Official FIP record"}</a><a class="extlink" target="_blank" rel="noopener" href="${mapUrl}">${ICONS.ext} ${fr ? "Voir sur une carte" : "View on a map"}</a><a class="extlink" target="_blank" rel="noopener" href="${webSearchUrl}">${ICONS.ext} ${fr ? "Rechercher le site web" : "Search for website"}</a></div>`;
       } else {
         message.className = "register-message error";
         message.textContent = fr ? "Référence non trouvée dans l’index public synchronisé." : "Reference not found in the synchronised public index.";

@@ -255,6 +255,10 @@ mark{background:rgba(251,191,36,.45);color:inherit;border-radius:3px;padding:0 2
 .register-result{border-left:4px solid var(--ifs-teal);background:rgba(0,201,167,.09);border-radius:0 var(--r-md) var(--r-md) 0;padding:16px 18px;margin-bottom:14px;color:var(--text-2);font-size:13.5px;line-height:1.55}
 .register-result strong{display:block;color:var(--text);margin-bottom:4px}
 .register-result p{margin:0 0 12px}
+.register-detail-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:12px 0 14px}
+.register-detail-grid div{display:flex;flex-direction:column;gap:3px;padding:9px 10px;background:var(--surface);border:1px solid var(--border);border-radius:var(--r-sm)}
+.register-detail-grid span{font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.06em}.register-detail-grid b{font-size:13px;color:var(--text);font-weight:600;overflow-wrap:anywhere}
+.register-result small{display:block;color:var(--text-muted);font-size:11.5px;line-height:1.45;margin-bottom:12px}
 .register-links h3{font-size:14px;margin:0 0 7px}.register-links p{font-size:13px;color:var(--text-2);line-height:1.55;margin:0}.register-links .extlink{margin-top:4px}
 
 /* content polish */
@@ -281,7 +285,7 @@ mark{background:rgba(251,191,36,.45);color:inherit;border-radius:3px;padding:0 2
   .card-head,.card-body{padding-left:16px;padding-right:16px}
   .pager{flex-direction:column}
   .pager .next{text-align:left}
-  .register-hero{padding:24px 20px}.register-hero h1{font-size:22px}.register-grid{grid-template-columns:1fr}.register-notice{flex-direction:column}.register-notice strong{white-space:normal}
+  .register-hero{padding:24px 20px}.register-hero h1{font-size:22px}.register-grid,.register-detail-grid{grid-template-columns:1fr}.register-notice{flex-direction:column}.register-notice strong{white-space:normal}
 }
 .scrim{display:none;position:fixed;inset:0;background:rgba(2,8,20,.55);z-index:45}
 
