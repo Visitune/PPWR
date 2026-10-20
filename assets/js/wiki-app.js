@@ -364,11 +364,20 @@ function vRegister(r) {
   </div>`;
 }
 
+let REGISTER_INDEX_PROMISE = null;
+function loadRegisterIndex() {
+  if (!REGISTER_INDEX_PROMISE) REGISTER_INDEX_PROMISE = fetch("data/register-index.json", { cache: "no-store" }).then(res => {
+    if (!res.ok) throw new Error("register index unavailable");
+    return res.json();
+  });
+  return REGISTER_INDEX_PROMISE;
+}
+
 function bindRegister(r) {
   const form = $("#registerForm");
   if (!form) return;
   const input = $("#registerNumber"), type = $("#registerType"), message = $("#registerMessage"), result = $("#registerResult");
-  form.addEventListener("submit", e => {
+  form.addEventListener("submit", async e => {
     e.preventDefault();
     const raw = input.value.trim();
     const number = raw.replace(/[\s-]/g, "").toUpperCase();
@@ -383,11 +392,31 @@ function bindRegister(r) {
     const kind = type.value.toUpperCase();
     const labels = { RON: fr ? "opérateur" : "operator", RFN: fr ? "installation/facilité" : "facility", RIN: fr ? "installation" : "installation" };
     const urls = { RON: "https://ec.europa.eu/food/food-feed-portal/screen/fcm/ron", RFN: "https://ec.europa.eu/food/food-feed-portal/screen/fcm/rfn", RIN: "https://ec.europa.eu/food/food-feed-portal/screen/fcm/rin" };
-    message.className = "register-message success";
-    message.textContent = fr ? `Référence ${kind} reconnue. Ouverture de la recherche officielle…` : `${kind} reference recognised. Opening the official search…`;
-    result.hidden = false;
-    result.innerHTML = `<strong>${fr ? "Vérification à terminer dans la source officielle" : "Verification to be completed in the official source"}</strong><p>${fr ? `Le format de ${kind} ${number} est correct pour un(e) ${labels[kind]}. Le registre officiel doit maintenant confirmer que cette référence existe et afficher son statut.` : `The format of ${kind} ${number} is valid for a ${labels[kind]}. The official register must now confirm that this reference exists and display its status.`}</p><a class="btn-primary" target="_blank" rel="noopener" href="${urls[kind]}">${ICONS.ext} ${fr ? `Rechercher ${kind} ${number} dans le FIP` : `Search ${kind} ${number} in FIP`}</a>`;
-    window.open(urls[kind], "_blank", "noopener");
+    message.className = "register-message";
+    message.textContent = fr ? "Recherche dans l’index du registre officiel…" : "Searching the official register index…";
+    result.hidden = true;
+    try {
+      const index = await loadRegisterIndex();
+      const entry = (index.entries || []).find(x => x.type === kind && String(x.id).toUpperCase() === number);
+      result.hidden = false;
+      if (entry) {
+        const fields = entry.fields || {};
+        const name = fields.fcmCompanyName || fields.fcmRecyclingFacilityName || fields.fcmRecyclingInstallationName || "";
+        const country = fields.fcmHoCountryName || fields.fcmRfCountry || "";
+        message.className = "register-message success";
+        message.textContent = fr ? "Référence trouvée dans l’index officiel." : "Reference found in the official index.";
+        result.innerHTML = `<strong>${fr ? `Référence ${kind} trouvée : ${esc(number)}` : `${kind} reference found: ${esc(number)}`}</strong><p>${esc([name, country].filter(Boolean).join(" · ") || (fr ? "La fiche existe dans le registre." : "The record exists in the register."))}</p><small>${fr ? `Index synchronisé le ${esc(index.generatedAt || "")}. Vérifiez la fiche FIP pour le détail complet.` : `Index synchronised on ${esc(index.generatedAt || "")}. Open FIP for full details.`}</small><p><a class="btn-primary" target="_blank" rel="noopener" href="${urls[kind]}">${ICONS.ext} ${fr ? "Ouvrir la fiche officielle" : "Open the official record"}</a></p>`;
+      } else {
+        message.className = "register-message error";
+        message.textContent = fr ? "Référence non trouvée dans l’index public synchronisé." : "Reference not found in the synchronised public index.";
+        result.innerHTML = `<strong>${fr ? "Aucun résultat correspondant" : "No matching result"}</strong><p>${fr ? `Aucune référence ${kind} correspondant à ${esc(number)} n’a été trouvée dans la copie publique synchronisée.` : `No ${kind} reference matching ${esc(number)} was found in the synchronised public copy.`}</p><a class="btn-primary" target="_blank" rel="noopener" href="${urls[kind]}">${ICONS.ext} ${fr ? "Contrôler directement dans le FIP" : "Check directly in FIP"}</a>`;
+      }
+    } catch (err) {
+      message.className = "register-message error";
+      message.textContent = fr ? "Vérification indisponible : l’index officiel n’est pas accessible." : "Verification unavailable: the official index cannot be reached.";
+      result.hidden = false;
+      result.innerHTML = `<strong>${fr ? "Aucune conclusion possible" : "No conclusion possible"}</strong><p>${fr ? "Le format est valide, mais cela ne prouve pas l’enregistrement. Consultez directement le portail officiel." : "The format is valid, but this does not prove registration. Check the official portal directly."}</p><a class="btn-primary" target="_blank" rel="noopener" href="${urls[kind]}">${ICONS.ext} ${fr ? "Ouvrir le FIP" : "Open FIP"}</a>`;
+    }
   });
 }
 
