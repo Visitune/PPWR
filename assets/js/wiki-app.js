@@ -34,7 +34,8 @@ const T = {
     dueBy: "Échéance", baseArticle: "Article de base", type: "Type", note: "Note",
     dutiesOf: "Obligations clés", backToActors: "Toutes les vues métiers",
     quickAccess: "Accès rapide", keyDates: "Dates clés", repealedNote: "Directive abrogée par le règlement 2025/40 — conservée ici à titre de référence et de comparatif.",
-    actsDisclaimer: "Statuts indicatifs (dernière revue : août 2026) — à vérifier sur eur-lex.europa.eu.",
+    actsDisclaimer: "Statuts indicatifs (vérification éditoriale : 20 octobre 2026) — à vérifier sur eur-lex.europa.eu.",
+    guidance: "Lire les orientations officielles de la Commission",
     heroTitle: "PPWR — le wiki du paquet européen emballages",
     heroSub: "Naviguez dans l'intégralité du règlement (UE) 2025/40 relatif aux emballages et aux déchets d'emballages, ainsi que les textes liés. Textes officiels complets, échéances, obligations par métier."
   },
@@ -51,7 +52,8 @@ const T = {
     dueBy: "Due", baseArticle: "Base article", type: "Type", note: "Note",
     dutiesOf: "Key obligations", backToActors: "All business views",
     quickAccess: "Quick access", keyDates: "Key dates", repealedNote: "Directive repealed by Regulation 2025/40 — kept here for reference and comparison.",
-    actsDisclaimer: "Indicative statuses (last reviewed: Aug 2026) — verify on eur-lex.europa.eu.",
+    actsDisclaimer: "Indicative statuses (editorial check: 20 October 2026) — verify on eur-lex.europa.eu.",
+    guidance: "Read the Commission’s official guidance",
     heroTitle: "EU Packaging Regulation — the PPWR wiki",
     heroSub: "Browse the full text of Regulation (EU) 2025/40 on packaging and packaging waste, plus related texts. Complete official texts, deadlines, duties per business role."
   }
@@ -231,6 +233,7 @@ function vHome(r) {
       <span class="chip">FR · EN</span>
       <span class="chip">${r.lang === "fr" ? "Texte intégral" : "Full text"}</span>
     </div>
+    <div class="hero-links"><a class="hero-link" target="_blank" rel="noopener" href="https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:52026XC03084">${ICONS.ext} ${esc(L.guidance)}</a></div>
   </section>
   <div class="grid cols-3">
     ${statCard(doc.chapters.length, L.chapters)}
@@ -251,10 +254,10 @@ function statCard(n, lbl) {
 function actorCardsShort(r) {
   const meta = window.PPWR_META[r.lang];
   return meta.actors.map(a => `
-    <div class="actor-card" onclick="location.hash='#/${r.lang}/actor/${a.id}'">
+    <a class="actor-card" href="#/${r.lang}/actor/${a.id}">
       <div class="actor-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.6-7 8-7s8 3 8 7"/></svg></div>
       <div><div class="actor-name">${esc(a.name)}</div><div class="actor-sum">${esc(a.summary)}</div></div>
-    </div>`).join("");
+    </a>`).join("");
 }
 function tlItemHtml(r, t) {
   const L = T[r.lang];

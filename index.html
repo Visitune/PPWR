@@ -4,11 +4,14 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Wiki PPWR — Règlement (UE) 2025/40</title>
+<meta name="description" content="Wiki bilingue du règlement européen PPWR (UE) 2025/40 : articles, échéances, obligations et textes liés.">
+<meta name="theme-color" content="#071a2e">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="assets/css/wiki.css">
 </head>
 <body>
+<a class="skip-link" href="#content">Aller au contenu</a>
 <div class="app">
   <aside class="sidebar">
     <div class="sb-head">
@@ -22,22 +25,22 @@
       <input type="search" id="q" placeholder="Rechercher…" autocomplete="off" spellcheck="false">
       <div id="searchPanel" hidden></div>
     </div>
-    <nav class="sb-nav" id="sb-nav"></nav>
-    <div class="sb-foot">Sources : EUR-Lex / CELLAR · CELEX 32025R0040<br>Wiki généré — août 2026</div>
+    <nav class="sb-nav" id="sb-nav" aria-label="Navigation principale"></nav>
+    <div class="sb-foot" id="sb-foot">Sources : EUR-Lex / CELLAR · CELEX 32025R0040<br>Vérification éditoriale : 20 octobre 2026</div>
   </aside>
   <div class="scrim" id="scrim"></div>
 
   <div class="main">
     <header class="topbar">
       <button class="icon-btn hamburger" id="btnNav" aria-label="Menu"></button>
-      <nav class="crumbs" id="crumbs"></nav>
+      <nav class="crumbs" id="crumbs" aria-label="Fil d’Ariane"></nav>
       <span class="topbar-spacer"></span>
       <div class="lang-switch">
         <button id="btnFr" class="on">FR</button><button id="btnEn">EN</button>
       </div>
       <button class="icon-btn" id="btnTheme" aria-label="Theme"></button>
     </header>
-    <main class="content" id="content"></main>
+    <main class="content" id="content" tabindex="-1" aria-live="polite"></main>
   </div>
 </div>
 
