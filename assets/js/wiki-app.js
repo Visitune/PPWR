@@ -347,7 +347,7 @@ function vRegister(r) {
           </select>
         </label>
         <label><span>${fr ? "Référence officielle (9 caractères)" : "Official reference (9 characters)"}</span>
-          <input id="registerNumber" inputmode="numeric" autocomplete="off" placeholder="Ex. 123456789" maxlength="11" required>
+          <input id="registerNumber" inputmode="text" autocomplete="off" placeholder="Ex. AE67-HE3FU" maxlength="17" required>
         </label>
       </div>
       <div class="register-actions">
