@@ -346,7 +346,7 @@ function vRegister(r) {
             <option value="rin">RIN — ${fr ? "installation de recyclage" : "recycling installation"}</option>
           </select>
         </label>
-        <label><span>${fr ? "Numéro officiel (9 chiffres)" : "Official number (9 digits)"}</span>
+        <label><span>${fr ? "Référence officielle (9 caractères)" : "Official reference (9 characters)"}</span>
           <input id="registerNumber" inputmode="numeric" autocomplete="off" placeholder="Ex. 123456789" maxlength="11" required>
         </label>
       </div>
@@ -359,7 +359,7 @@ function vRegister(r) {
   </div></div>
   <div id="registerResult" class="register-result" hidden></div>
   <div class="grid cols-2 register-links">
-    <div class="card"><div class="card-body"><h3>${fr ? "Comment lire le résultat" : "How to read the result"}</h3><p>${fr ? "Une référence valide respecte le format à 9 chiffres. Seule la fiche officielle du FIP permet ensuite de confirmer le nom, le pays, le statut et les éventuelles installations liées." : "A valid reference follows the 9-digit format. Only the official FIP record can then confirm the name, country, status and any linked facilities."}</p></div></div>
+    <div class="card"><div class="card-body"><h3>${fr ? "Comment lire le résultat" : "How to read the result"}</h3><p>${fr ? "Une référence valide respecte le format à 9 caractères alphanumériques. Seule la fiche officielle du FIP permet ensuite de confirmer le nom, le pays, le statut et les éventuelles installations liées." : "A valid reference follows the 9-character alphanumeric format. Only the official FIP record can then confirm the name, country, status and any linked facilities."}</p></div></div>
     <div class="card"><div class="card-body"><h3>${fr ? "Sources réglementaires" : "Regulatory sources"}</h3><p><a class="extlink" target="_blank" rel="noopener" href="${official}">${ICONS.ext} ${fr ? "Page de la Commission sur le recyclage plastique" : "Commission plastic recycling page"}</a></p></div></div>
   </div>`;
 }
@@ -371,11 +371,11 @@ function bindRegister(r) {
   form.addEventListener("submit", e => {
     e.preventDefault();
     const raw = input.value.trim();
-    const number = raw.replace(/[\s-]/g, "");
+    const number = raw.replace(/[\s-]/g, "").toUpperCase();
     const fr = r.lang === "fr";
-    if (!/^\d{9}$/.test(number)) {
+    if (!/^[A-Z0-9]{9}$/.test(number)) {
       message.className = "register-message error";
-      message.textContent = fr ? "Format non valide : saisissez exactement 9 chiffres (les espaces et tirets sont ignorés)." : "Invalid format: enter exactly 9 digits (spaces and hyphens are ignored).";
+      message.textContent = fr ? "Format non valide : saisissez exactement 9 caractères alphanumériques (les espaces et tirets sont ignorés)." : "Invalid format: enter exactly 9 alphanumeric characters (spaces and hyphens are ignored).";
       result.hidden = true;
       input.focus();
       return;
