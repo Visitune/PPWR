@@ -6,6 +6,7 @@ const $ = (s, r) => (r || document).querySelector(s);
 const $$ = (s, r) => Array.from((r || document).querySelectorAll(s));
 const esc = s => String(s == null ? "" : s).replace(/[&<>"']/g,
   c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const safeDecode = s => { try { return decodeURIComponent(s); } catch (e) { return s; } };
 const norm = s => String(s || "").toLowerCase()
   .normalize("NFD").replace(/[\u0300-\u036f]/g, "");
 const debounce = (fn, ms) => { let t; return (...a) => { clearTimeout(t); t = setTimeout(() => fn(...a), ms); }; };
@@ -24,36 +25,36 @@ const T = {
   fr: {
     appName: "Wiki PPWR", appSub: "Règlement (UE) 2025/40", searchPh: "Rechercher un article, un mot-clé…",
     home: "Accueil", tools: "Outils", related: "Textes liés", timeline: "Échéances réglementaires",
-    actors: "Vues métiers", glossary: "Glossaire", acts: "Suivi des actes délégués",
+    actors: "Vues métiers", glossary: "Glossaire", acts: "Suivi des actes et normes",
     toc: "Sommaire", recitals: "Préambule — considérants", annexes: "Annexes",
     officialText: "Texte officiel sur EUR-Lex", pdf: "PDF",
     prev: "Précédent", next: "Suivant", favorites: "Favoris", noFav: "Aucun favori pour l'instant.",
     results: "Résultats", noResults: "Aucun résultat", searchInDoc: "dans le texte",
     chapters: "chapitres", articles: "articles", annexesN: "annexes", recitalsN: "considérants",
-    statusAdopted: "Adopté", statusInprogress: "En cours", statusExpected: "Attendu",
-    dueBy: "Échéance", baseArticle: "Article de base", type: "Type", note: "Note",
+    statusAdopted: "Adopté", statusInprogress: "En cours", statusExpected: "Attendu", statusReview: "À vérifier",
+    dueBy: "Échéance", baseArticle: "Article de base", type: "Type", note: "Note", source: "Source officielle",
     dutiesOf: "Obligations clés", backToActors: "Toutes les vues métiers",
     quickAccess: "Accès rapide", keyDates: "Dates clés", repealedNote: "Directive abrogée par le règlement 2025/40 — conservée ici à titre de référence et de comparatif.",
-    actsDisclaimer: "Statuts indicatifs (vérification éditoriale : 20 octobre 2026) — à vérifier sur eur-lex.europa.eu.",
-    guidance: "Lire les orientations officielles de la Commission",
+    actsDisclaimer: "Suivi éditorial indicatif (vérification : 20 octobre 2026). La date d'adoption d'un acte et sa date d'application peuvent différer ; la source officielle fait foi.",
+    guidance: "Lire les orientations officielles de la Commission", faq: "Consulter la FAQ officielle (août 2026)",
     heroTitle: "PPWR — le wiki du paquet européen emballages",
     heroSub: "Naviguez dans l'intégralité du règlement (UE) 2025/40 relatif aux emballages et aux déchets d'emballages, ainsi que les textes liés. Textes officiels complets, échéances, obligations par métier."
   },
   en: {
     appName: "PPWR Wiki", appSub: "Regulation (EU) 2025/40", searchPh: "Search an article, keyword…",
     home: "Home", tools: "Tools", related: "Related texts", timeline: "Regulatory deadlines",
-    actors: "Business views", glossary: "Glossary", acts: "Delegated acts tracker",
+    actors: "Business views", glossary: "Glossary", acts: "Acts and standards tracker",
     toc: "Table of contents", recitals: "Preamble — recitals", annexes: "Annexes",
     officialText: "Official text on EUR-Lex", pdf: "PDF",
     prev: "Previous", next: "Next", favorites: "Favourites", noFav: "No favourites yet.",
     results: "Results", noResults: "No results", searchInDoc: "in the text",
     chapters: "chapters", articles: "articles", annexesN: "annexes", recitalsN: "recitals",
-    statusAdopted: "Adopted", statusInprogress: "In progress", statusExpected: "Expected",
-    dueBy: "Due", baseArticle: "Base article", type: "Type", note: "Note",
+    statusAdopted: "Adopted", statusInprogress: "In progress", statusExpected: "Expected", statusReview: "To verify",
+    dueBy: "Due", baseArticle: "Base article", type: "Type", note: "Note", source: "Official source",
     dutiesOf: "Key obligations", backToActors: "All business views",
     quickAccess: "Quick access", keyDates: "Key dates", repealedNote: "Directive repealed by Regulation 2025/40 — kept here for reference and comparison.",
-    actsDisclaimer: "Indicative statuses (editorial check: 20 October 2026) — verify on eur-lex.europa.eu.",
-    guidance: "Read the Commission’s official guidance",
+    actsDisclaimer: "Indicative editorial tracker (checked: 20 October 2026). An act's adoption date and application date may differ; the official source prevails.",
+    guidance: "Read the Commission’s official guidance", faq: "Open the official FAQ (August 2026)",
     heroTitle: "EU Packaging Regulation — the PPWR wiki",
     heroSub: "Browse the full text of Regulation (EU) 2025/40 on packaging and packaging waste, plus related texts. Complete official texts, deadlines, duties per business role."
   }
@@ -82,11 +83,13 @@ function flatSeq(doc) {
 }
 
 /* ---------------- favorites ---------------- */
-function favGet() { try { return JSON.parse(localStorage.getItem("ppwrwiki_fav") || "{}"); } catch (e) { return {}; } }
+function storageGet(key, fallback = "") { try { return localStorage.getItem(key) ?? fallback; } catch (e) { return fallback; } }
+function storageSet(key, value) { try { localStorage.setItem(key, value); } catch (e) { /* private browsing / blocked storage */ } }
+function favGet() { try { return JSON.parse(storageGet("ppwrwiki_fav", "{}")) || {}; } catch (e) { return {}; } }
 function favToggle(key, meta) {
   const f = favGet();
   if (f[key]) delete f[key]; else f[key] = meta;
-  localStorage.setItem("ppwrwiki_fav", JSON.stringify(f));
+  storageSet("ppwrwiki_fav", JSON.stringify(f));
 }
 function favHas(key) { return !!favGet()[key]; }
 
@@ -95,20 +98,20 @@ let state = { lang: "fr", view: "home", doc: null, item: null };
 function parseHash() {
   const h = location.hash.replace(/^#\/?/, "");
   const seg = h.split("/").filter(Boolean);
-  let lang = seg[0] && /^[a-z]{2}$/.test(seg[0]) ? seg[0] : (localStorage.getItem("ppwrwiki_lang") || "fr");
+  let lang = seg[0] && /^[a-z]{2}$/.test(seg[0]) ? seg[0] : (storageGet("ppwrwiki_lang", "fr") || "fr");
   if (!T[lang]) lang = "fr";
   const view = seg[1] || "home";
-  return { lang, view, p1: decodeURIComponent(seg[2] || ""), p2: decodeURIComponent(seg[3] || "") };
+  return { lang, view, p1: safeDecode(seg[2] || ""), p2: safeDecode(seg[3] || "") };
 }
 
 /* ---------------- linkify legal cross-references ---------------- */
-function linkify(html, lang, curDoc) {
-  const docs = ["ppwr"];
+function linkify(html, lang, curDoc = "ppwr") {
   const parts = String(html).split(/(<[^>]*>)/);
   const wordArt = lang === "fr" ? "article" : "article";
   const wordAnn = lang === "fr" ? "annexe" : "annex";
-  const artIds = new Set(allArticles(getDoc("ppwr", lang)).map(x => x.art.id));
-  const anxIds = new Set(getDoc("ppwr", lang).annexes.map(a => a.id.toLowerCase()));
+  const doc = getDoc(curDoc, lang) || getDoc("ppwr", lang);
+  const artIds = new Set(allArticles(doc).map(x => x.art.id));
+  const anxIds = new Set(doc.annexes.map(a => a.id.toLowerCase()));
   const ROMAN = "[IVXLCDM]+";
   const reArt = new RegExp("\\b(" + wordArt + "x?\\s+)(\\d{1,3})(\\s+(?:à|to|et|and)\\s+\\d{1,3})?(\\s+(?:bis|ter))?\\b", "gi");
   const reAnx = new RegExp("\\b(" + wordAnn + "x?\\s+)(" + ROMAN + ")\\b", "gi");
@@ -118,12 +121,12 @@ function linkify(html, lang, curDoc) {
       const id = "art_" + parseInt(n, 10);
       if (!artIds.has(id)) return m;
       const tail = (range || "") + (bis || "");
-      return pre + '<a href="#/' + lang + '/doc/ppwr/' + id + '" class="xref">' + n + "</a>" + tail;
+      return pre + '<a href="#/' + lang + '/doc/' + curDoc + '/' + id + '" class="xref">' + n + "</a>" + tail;
     });
     p = p.replace(reAnx, (m, pre, rom) => {
       const id = "anx_" + rom.toUpperCase();
       if (!anxIds.has(id.toLowerCase())) return m;
-      return pre + '<a href="#/' + lang + '/doc/ppwr/' + id + '" class="xref">' + rom + "</a>";
+      return pre + '<a href="#/' + lang + '/doc/' + curDoc + '/' + id + '" class="xref">' + rom + "</a>";
     });
     return p;
   }).join("");
@@ -140,12 +143,12 @@ function buildSidebar(route) {
   function docTree(key, label) {
     const doc = getDoc(key, route.lang);
     if (!doc) return "";
-    let h = '<div class="tree-item"><button class="tree-btn">' + esc(label) + ICONS.chev + "</button><div class=\"tree-sub\">";
+    let h = '<div class="tree-item"><button class="tree-btn" aria-expanded="false">' + esc(label) + ICONS.chev + "</button><div class=\"tree-sub\">";
     h += link(L.toc, "#/" + route.lang + "/doc/" + key + "/toc", route.lang + "/doc/" + key + "/toc//");
     h += link(L.recitals, "#/" + route.lang + "/doc/" + key + "/recitals", route.lang + "/doc/" + key + "/recitals//");
     doc.chapters.forEach((c, ci) => {
       if (!c.articles.length && !c.label && !c.title) return;
-      let sub = '<div class="tree-item"><button class="tree-btn">' +
+      let sub = '<div class="tree-item"><button class="tree-btn" aria-expanded="false">' +
         esc(c.label ? c.label + " — " : "") + esc(c.title || ("[" + (ci + 1) + "]")) + ICONS.chev +
         '</button><div class="tree-sub">';
       c.articles.forEach(a => {
@@ -156,7 +159,7 @@ function buildSidebar(route) {
       h += sub;
     });
     if (doc.annexes.length) {
-      h += '<div class="tree-item"><button class="tree-btn">' + esc(L.annexes) + ICONS.chev + '</button><div class="tree-sub">';
+      h += '<div class="tree-item"><button class="tree-btn" aria-expanded="false">' + esc(L.annexes) + ICONS.chev + '</button><div class="tree-sub">';
       doc.annexes.forEach(a => {
         const name = (a.num || a.id) + (a.title ? " · " + a.title : "");
         h += link(name, "#/" + route.lang + "/doc/" + key + "/" + a.id, route.lang + "/doc/" + key + "/" + a.id + "//");
@@ -168,9 +171,9 @@ function buildSidebar(route) {
 
   function toolTree() {
     const meta = window.PPWR_META[route.lang];
-    let h = '<div class="tree-item"><button class="tree-btn">' + esc(L.tools) + ICONS.chev + '</button><div class="tree-sub">';
+    let h = '<div class="tree-item"><button class="tree-btn" aria-expanded="false">' + esc(L.tools) + ICONS.chev + '</button><div class="tree-sub">';
     h += link(L.timeline, "#/" + route.lang + "/timeline", route.lang + "/timeline///");
-    h += '<div class="tree-item"><button class="tree-btn">' + esc(L.actors) + ICONS.chev + '</button><div class="tree-sub">';
+    h += '<div class="tree-item"><button class="tree-btn" aria-expanded="false">' + esc(L.actors) + ICONS.chev + '</button><div class="tree-sub">';
     meta.actors.forEach(a => {
       h += link(a.name, "#/" + route.lang + "/actor/" + a.id, route.lang + "/actor/" + a.id + "//");
     });
@@ -204,14 +207,21 @@ function buildSidebar(route) {
 
   // expandable behavior
   $$(".tree-btn", sb).forEach(btn => {
-    btn.addEventListener("click", () => btn.parentElement.classList.toggle("open"));
+    btn.addEventListener("click", () => {
+      const open = btn.parentElement.classList.toggle("open");
+      btn.setAttribute("aria-expanded", open);
+    });
   });
   // auto-open path to current item
   const act = $(".tree-link.active", sb);
   if (act) {
     let node = act.parentElement;
     while (node && node.classList) {
-      if (node.classList.contains("tree-item")) node.classList.add("open");
+      if (node.classList.contains("tree-item")) {
+        node.classList.add("open");
+        const button = $(".tree-btn", node);
+        if (button) button.setAttribute("aria-expanded", "true");
+      }
       node = node.parentElement;
     }
   }
@@ -233,7 +243,7 @@ function vHome(r) {
       <span class="chip">FR · EN</span>
       <span class="chip">${r.lang === "fr" ? "Texte intégral" : "Full text"}</span>
     </div>
-    <div class="hero-links"><a class="hero-link" target="_blank" rel="noopener" href="https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:52026XC03084">${ICONS.ext} ${esc(L.guidance)}</a></div>
+    <div class="hero-links"><a class="hero-link" target="_blank" rel="noopener" href="https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:52026XC03084">${ICONS.ext} ${esc(L.guidance)}</a><a class="hero-link" target="_blank" rel="noopener" href="https://environment.ec.europa.eu/publications/faq-packaging-and-packaging-waste-regulation-ppwr_en">${ICONS.ext} ${esc(L.faq)}</a></div>
   </section>
   <div class="grid cols-3">
     ${statCard(doc.chapters.length, L.chapters)}
@@ -316,7 +326,8 @@ function vActs(r) {
   const L = T[r.lang], acts = window.PPWR_META[r.lang].acts;
   const badge = s => s === "adopted" ? '<span class="badge green">' + esc(L.statusAdopted) + "</span>"
     : s === "inprogress" ? '<span class="badge amber">' + esc(L.statusInprogress) + "</span>"
-      : '<span class="badge gray">' + esc(L.statusExpected) + "</span>";
+      : s === "review" ? '<span class="badge red">' + esc(L.statusReview) + "</span>"
+        : '<span class="badge gray">' + esc(L.statusExpected) + "</span>";
   return `<h2 class="sec-title">${esc(L.acts)}</h2>
   <p style="color:var(--text-2);font-size:13px;margin-bottom:14px">${esc(L.actsDisclaimer)}</p>
   ${acts.map(a => `<div class="card"><div class="card-body" style="padding:16px 20px">
@@ -328,7 +339,8 @@ function vActs(r) {
       ${a.due ? `<span>${esc(L.dueBy)} : <b>${a.due.split("-").reverse().join("/")}</b></span>` : ""}
       <span>${esc(L.baseArticle)} : <a href="#/${r.lang}/doc/ppwr/${a.base}">${a.base.replace("art_", "art. ")}</a></span>
     </div>
-    <div style="font-size:13px;color:var(--text-2);margin-top:6px">${esc(a.note)}</div>
+     <div style="font-size:13px;color:var(--text-2);margin-top:6px">${esc(a.note)}</div>
+     ${a.source ? `<a class="extlink" target="_blank" rel="noopener" href="${esc(a.source)}">${ICONS.ext} ${esc(L.source)}</a>` : ""}
   </div></div>`).join("")}`;
 }
 
@@ -364,7 +376,7 @@ function vRecitals(r, key) {
   const doc = getDoc(key, r.lang), L = T[r.lang];
   const head = docHead(r, key, doc, L.recitals);
   const list = doc.recitals.map(rc =>
-    `<div class="recital"><span class="recital-n">${esc(rc.n)}</span><div>${linkify(rc.html, r.lang)}</div></div>`).join("");
+    `<div class="recital"><span class="recital-n">${esc(rc.n)}</span><div>${linkify(rc.html, r.lang, key)}</div></div>`).join("");
   return head + `<div class="card"><div class="card-body">${list}</div></div>`;
 }
 
@@ -403,8 +415,8 @@ function vItem(r, key, id) {
     const a = found.a || {}, ch = found.c || {};
     title = a.num || cur.id; subtitle = a.title || "";
     inner = (a.blocks || []).map(b => b.t === "note"
-      ? `<div class="oj-note-block">${linkify(b.html, r.lang)}</div>`
-      : `<div class="prov">${linkify(b.html, r.lang)}</div>`).join("")
+      ? `<div class="oj-note-block">${linkify(b.html, r.lang, key)}</div>`
+      : `<div class="prov">${linkify(b.html, r.lang, key)}</div>`).join("")
       || `<div class="empty">${esc("(—)")}</div>`;
     if (ch.label || ch.title) {
       inner = `<div style="font-size:12px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px">${esc(ch.label)} ${esc(ch.title)}</div>` + inner;
@@ -463,7 +475,7 @@ function buildIndex(lang) {
 function doSearch(q, lang) {
   q = norm(q).trim();
   const panel = $("#searchPanel");
-  if (q.length < 2) { panel.hidden = true; panel.innerHTML = ""; return; }
+  if (q.length < 2) { panel.hidden = true; panel.innerHTML = ""; $("#q").setAttribute("aria-expanded", "false"); return; }
   const entries = buildIndex(lang);
   const scored = [];
   for (const e of entries) {
@@ -485,12 +497,13 @@ function doSearch(q, lang) {
       const href = s.e.docKey === "_meta"
         ? "#/" + lang + "/glossary"
         : "#/" + lang + "/doc/" + s.e.docKey + "/" + (s.e.type === "rec" ? "recitals" : s.e.id);
-      return `<a class="search-hit" href="${href}" onclick="document.getElementById('searchPanel').hidden=true">
+      return `<a class="search-hit" role="option" href="${href}" onclick="document.getElementById('searchPanel').hidden=true">
         <div style="font-weight:700;font-size:13px">${hlMark(esc(s.e.label), q)}</div>
         <div style="font-size:12px;color:var(--text-muted);overflow:hidden;max-height:34px">…${hl}…</div></a>`;
     }).join("")
     : `<div style="padding:14px;color:var(--text-muted);font-size:13px">${esc(L.noResults)}</div>`;
   panel.hidden = false;
+  $("#q").setAttribute("aria-expanded", "true");
 }
 function hlMark(label, q) {
   const w = q.split(/\s+/)[0];
@@ -502,14 +515,18 @@ function hlMark(label, q) {
 function render() {
   const r = parseHash();
   state = { ...state, ...r };
-  localStorage.setItem("ppwrwiki_lang", r.lang);
-  document.documentElement.setAttribute("data-theme", localStorage.getItem("ppwrwiki_theme") || "light");
+  storageSet("ppwrwiki_lang", r.lang);
+  const theme = storageGet("ppwrwiki_theme", "light") || "light";
+  document.documentElement.setAttribute("data-theme", theme);
 
   $("#sb-appname").textContent = T[r.lang].appName;
   $("#sb-appsub").textContent = T[r.lang].appSub;
   $("#q").placeholder = T[r.lang].searchPh;
   $("#btnFr").classList.toggle("on", r.lang === "fr");
   $("#btnEn").classList.toggle("on", r.lang === "en");
+  $("#btnFr").setAttribute("aria-pressed", r.lang === "fr");
+  $("#btnEn").setAttribute("aria-pressed", r.lang === "en");
+  $("#btnTheme").setAttribute("aria-label", theme === "dark" ? (r.lang === "fr" ? "Activer le thème clair" : "Use light theme") : (r.lang === "fr" ? "Activer le thème sombre" : "Use dark theme"));
 
   let html = "";
   switch (r.view) {
@@ -562,11 +579,12 @@ function render() {
 window.addEventListener("hashchange", render);
 document.addEventListener("DOMContentLoaded", () => {
   $("#btnNav").innerHTML = ICONS.menu;
-  $("#btnTheme").innerHTML = (localStorage.getItem("ppwrwiki_theme") || "light") === "dark" ? ICONS.sun : ICONS.moon;
+  const initialTheme = storageGet("ppwrwiki_theme", "light") || "light";
+  $("#btnTheme").innerHTML = initialTheme === "dark" ? ICONS.sun : ICONS.moon;
   $("#btnTheme").addEventListener("click", () => {
-    const cur = localStorage.getItem("ppwrwiki_theme") || "light";
+    const cur = storageGet("ppwrwiki_theme", "light") || "light";
     const nxt = cur === "dark" ? "light" : "dark";
-    localStorage.setItem("ppwrwiki_theme", nxt);
+    storageSet("ppwrwiki_theme", nxt);
     document.documentElement.setAttribute("data-theme", nxt);
     $("#btnTheme").innerHTML = nxt === "dark" ? ICONS.sun : ICONS.moon;
   });
@@ -584,9 +602,19 @@ document.addEventListener("DOMContentLoaded", () => {
     seg[0] = "en"; location.hash = "#/" + seg.join("/");
   });
   $("#q").addEventListener("input", debounce(e => doSearch(e.target.value, parseHash().lang), 140));
-  document.addEventListener("click", e => {
-    if (!$("#searchWrap").contains(e.target)) $("#searchPanel").hidden = true;
+  $("#q").addEventListener("keydown", e => {
+    if (e.key === "Escape") { $("#q").value = ""; $("#searchPanel").hidden = true; $("#q").blur(); }
   });
-  if (!location.hash) location.hash = "#/" + (localStorage.getItem("ppwrwiki_lang") || "fr") + "/home";
+  document.addEventListener("keydown", e => {
+    if (e.key === "Escape") document.body.classList.remove("nav-open");
+    if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "k") { e.preventDefault(); $("#q").focus(); }
+  });
+  document.addEventListener("click", e => {
+    if (!$("#searchWrap").contains(e.target)) {
+      $("#searchPanel").hidden = true;
+      $("#q").setAttribute("aria-expanded", "false");
+    }
+  });
+  if (!location.hash) location.hash = "#/" + (storageGet("ppwrwiki_lang", "fr") || "fr") + "/home";
   render();
 });

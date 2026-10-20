@@ -22,8 +22,8 @@
       </div>
     </div>
     <div class="sb-search" id="searchWrap">
-      <input type="search" id="q" placeholder="Rechercher…" autocomplete="off" spellcheck="false">
-      <div id="searchPanel" hidden></div>
+      <input type="search" id="q" placeholder="Rechercher…" autocomplete="off" spellcheck="false" aria-label="Rechercher dans le wiki" aria-controls="searchPanel" aria-expanded="false">
+      <div id="searchPanel" role="listbox" hidden></div>
     </div>
     <nav class="sb-nav" id="sb-nav" aria-label="Navigation principale"></nav>
     <div class="sb-foot" id="sb-foot">Sources : EUR-Lex / CELLAR · CELEX 32025R0040<br>Vérification éditoriale : 20 octobre 2026</div>
@@ -36,9 +36,9 @@
       <nav class="crumbs" id="crumbs" aria-label="Fil d’Ariane"></nav>
       <span class="topbar-spacer"></span>
       <div class="lang-switch">
-        <button id="btnFr" class="on">FR</button><button id="btnEn">EN</button>
+        <button id="btnFr" class="on" aria-pressed="true">FR</button><button id="btnEn" aria-pressed="false">EN</button>
       </div>
-      <button class="icon-btn" id="btnTheme" aria-label="Theme"></button>
+      <button class="icon-btn" id="btnTheme" aria-label="Changer de thème"></button>
     </header>
     <main class="content" id="content" tabindex="-1" aria-live="polite"></main>
   </div>

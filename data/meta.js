@@ -1,6 +1,6 @@
 /* Enrichissement éditorial du wiki PPWR — rédigé et sourcé depuis le texte du règlement (UE) 2025/40.
    Les champs "ref" pointent vers des articles du règlement ; les statuts des actes sont indicatifs
-   et doivent être revérifiés sur eur-lex.europa.eu. Dernière rédaction : août 2026. */
+   et doivent être revérifiés sur eur-lex.europa.eu. Dernière vérification éditoriale : 20 octobre 2026. */
 window.PPWR_META = window.PPWR_META || {};
 
 window.PPWR_META.fr = {
@@ -13,27 +13,29 @@ window.PPWR_META.fr = {
       desc: "La Commission demande aux organismes de normalisation européens des normes harmonisées sur l'emballage compostable à domicile.", refs: ["art_9"] },
     { date: "2026-08-12", major: true, title: "MISE EN APPLICATION DU RÈGLEMENT",
       desc: "Le règlement devient applicable dans tous les États membres. Publication attendue des actes d'exécution relatifs à l'étiquetage harmonisé.", refs: ["art_71", "art_12"] },
-    { date: "2027-01-31", major: false, title: "Lignes directrices formats d'emballage",
-      desc: "Lignes directrices expliquant l'annexe V (formats restreints), publiées en consultation avec les États membres et l'EFSA.", refs: ["art_25"] },
+    { date: "2026-12-31", major: false, title: "Actes relatifs au contenu recyclé plastique",
+      desc: "Échéance prévue pour les actes d'exécution et l'acte délégué relatifs au calcul, à la vérification et aux critères de durabilité du contenu recyclé plastique. Cette échéance ne fixe pas à elle seule la date d'obligation pour les opérateurs.", refs: ["art_7"] },
     { date: "2027-02-12", major: false, title: "Observatoire européen du réemploi",
       desc: "Mise en place d'un observatoire chargé de suivre la mise en œuvre et de collecter les données sur les pratiques de réemploi.", refs: ["art_31"] },
-    { date: "2028-08-12", major: true, title: "Étiquetage harmonisé obligatoire",
-      desc: "Les emballages mis sur le marché portent l'étiquette harmonisée : identification des matériaux, consignes de tri, pictogrammes, substances préoccupantes, QR code REP.", refs: ["art_12", "art_13"] },
+    { date: "2027-06-30", major: false, title: "Méthode de calcul des objectifs de réemploi",
+      desc: "La Commission adopte l'acte d'exécution établissant la méthode de calcul des objectifs de réemploi. L'obligation de démonstration peut être décalée de 18 mois après son entrée en vigueur.", refs: ["art_30"] },
+    { date: "2028-08-12", major: true, title: "Échéance de l'étiquetage harmonisé",
+      desc: "L'étiquetage harmonisé s'applique à partir du 12 août 2028 ou 24 mois après l'entrée en vigueur des actes d'exécution pertinents, si cette date est postérieure.", refs: ["art_12", "art_13"] },
     { date: "2029-02-12", major: false, title: "Application de l'article 67 §5",
       desc: "Début d'application des dispositions modifiant la directive SUP 2019/904 introduites par le PPWR.", refs: ["art_67"] },
     { date: "2030-01-01", major: true, title: "Échéance majeure : conformité des emballages",
       items: [
-        ["Classes de recyclabilité A/B/C obligatoires pour la mise sur le marché", "art_6"],
-        ["Contenu recyclé minimal : 30 % PET au contact, 10 % autres plastiques de contact, 30 % bouteilles boissons en plastique à usage unique, 35 % autres emballages plastiques", "art_7"],
+        ["Les emballages hors classes A, B ou C ne peuvent plus être mis sur le marché, sous réserve du mécanisme de report lié à l'entrée en vigueur des actes délégués", "art_6"],
+        ["Contenu recyclé minimal : 30 % PET au contact, 10 % autres plastiques de contact, 30 % bouteilles de boissons à usage unique, 35 % autres emballages plastiques — ou trois ans après l'acte d'exécution si cette date est postérieure", "art_7"],
         ["Objectifs de réemploi : 10 % des emballages de boissons (à emporter)", "art_29"],
         ["Interdiction des formats visés à l'annexe V : fruits & légumes frais emballés < 1,5 kg, mini-format hôtellerie…", "art_25"],
         ["Stations de recharge : effort de 10 % de la surface de vente > 400 m²", "art_28"],
-        ["Preuve de réalisation des objectifs de réemploi (calcul art. 30)", "art_30"],
+        ["Démonstration des objectifs de réemploi : à partir de 2030 ou 18 mois après l'acte d'exécution méthodologique, si cette date est postérieure", "art_30"],
         ["Prévention : -5 % de déchets d'emballages par habitant vs 2018", "art_43"]
       ] },
-    { date: "2035-01-01", major: true, title: "Recyclage à l'échelle & objectifs renforcés",
+    { date: "2035-01-01", major: true, title: "Recyclage à l'échelle & prévention renforcée",
       items: [
-        ["Évaluation de la recyclabilité fondée aussi sur les taux de recyclage effectifs à grande échelle", "art_6"],
+        ["L'exigence de recyclage à l'échelle s'applique, sauf report jusqu'à cinq ans après l'acte d'exécution pertinent", "art_6"],
         ["Prévention : -10 % de déchets d'emballages par habitant vs 2018", "art_43"],
         ["Examen par la Commission des exceptions à la conception pour le recyclage", "art_6"]
       ] },
@@ -41,7 +43,7 @@ window.PPWR_META.fr = {
       desc: "Seuls les emballages relevant au moins de la classe B de recyclabilité peuvent être mis sur le marché de l'UE.", refs: ["art_6"] },
     { date: "2040-01-01", major: true, title: "Objectifs 2040",
       items: [
-        ["Contenu recyclé renforcé : jusqu'à 65 % (bouteilles boissons UU et autres emballages plastiques), 50 % plastiques de contact", "art_7"],
+        ["Contenu recyclé : 50 % PET au contact, 25 % autres plastiques au contact, 65 % bouteilles de boissons à usage unique, 65 % autres emballages plastiques", "art_7"],
         ["Réemploi boissons : 40 % (à emporter)", "art_29"],
         ["Prévention : -15 % de déchets d'emballages par habitant vs 2018", "art_43"]
       ] }
@@ -79,7 +81,7 @@ window.PPWR_META.fr = {
       duties: [
         ["Ne pas mettre à disposition d'emballages non conformes ; vérifier DoC et marquage", "art_19"],
         ["Proposer la recharge : 10 % de la surface > 400 m² dédiée aux stations de recharge à partir de 2030", "art_28"],
-        ["Vente à emporter : offrir une option de réemploi (10 % en 2030, 40 % en 2040) et informer le consommateur", "art_32"],
+        ["Vente à emporter : proposer la recharge des contenants personnels à partir de 2027 et respecter les objectifs de réemploi applicables au secteur", "art_32"],
         ["Obligation d'offre de réemploi pour les distributeurs finaux du secteur de la vente à emporter", "art_33"],
         ["Agir comme fabricant en cas de reconditionnement ou d'apposition de sa marque", "art_21"]
       ] },
@@ -106,7 +108,7 @@ window.PPWR_META.fr = {
     ["Emballage groupé", "Emballage secondaire regroupant plusieurs unités de vente (correspond à l'emballage secondaire).", "art_3"],
     ["Emballage de transport", "Emballage tertiaire facilitant la manutention et le transport (ex-caisses, palettes).", "art_3"],
     ["Producteur", "Toute personne qui met des emballages ou des produits emballés sur le marché pour la première fois sur le territoire national (fabricant, importateur, vendeur à distance, remplisseur).", "art_3"],
-    ["Recyclabilité (classes A/B/C)", "Capacité d'un emballage à être conçu pour le recyclage puis effectivement recyclé à l'échelle ; performance notée A, B ou C — en dessous de C, mise sur le marché interdite dès 2030.", "art_6"],
+    ["Recyclabilité (classes A/B/C)", "Capacité d'un emballage à satisfaire les critères de conception et, selon l'étape applicable, de recyclage à l'échelle ; performance notée A, B ou C, avec des dates d'application liées aux actes européens.", "art_6"],
     ["Contenu recyclé (PCR)", "Pourcentage minimum de matière issue de déchets plastiques post-consommation, calculé en moyenne par usine et par an.", "art_7"],
     ["Substance préoccupante", "Substances (dont PFAS) restreintes dans les emballages au-delà de seuils fixés par acte délégué.", "art_5"],
     ["Minimisation", "Le poids et le volume de l'emballage doivent être réduits au minimum nécessaire à sa fonctionnalité ; doubles fonds et parois factices interdits.", "art_10"],
@@ -121,25 +123,28 @@ window.PPWR_META.fr = {
   acts: [
     { topic: "Méthode uniforme d'évaluation de la recyclabilité & critères de conception",
       type: "Acte délégué", base: "art_6", due: "2028-01-01",
-      status: "inprogress", note: "Projet soumis à retour d'expérience en 2025 ; adoption attendue pour application au 01/01/2030." },
+      status: "inprogress", note: "Échéance d'adoption au plus tard le 01/01/2028 ; l'application des critères intervient 24 mois après l'entrée en vigueur des actes délégués.", source: "https://eur-lex.europa.eu/eli/reg/2025/40/oj" },
     { topic: "Étiquetage harmonisé des emballages (pictogrammes, QR, méthode d'identification des matériaux)",
       type: "Acte d'exécution", base: "art_12", due: "2026-08-12",
-      status: "inprogress", note: "Doit être publié au plus tard le 12/08/2026 ; application de l'étiquetage à partir du 12/08/2028." },
+      status: "review", note: "Échéance d'adoption dépassée au 12/08/2026 ; l'application intervient 24 mois après l'entrée en vigueur de l'acte pertinent si cette date est postérieure au 12/08/2028.", source: "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:52026XC03084" },
     { topic: "Symbole harmonisé des systèmes de consigne",
       type: "Acte d'exécution", base: "art_12", due: "2026-08-12",
-      status: "inprogress", note: "Symbole apposé sur les emballages soumis à consigne et sur les contenants de collecte." },
+      status: "review", note: "Échéance d'adoption dépassée au 12/08/2026 ; état de publication à confirmer dans le Journal officiel.", source: "https://eur-lex.europa.eu/eli/reg/2025/40/oj" },
     { topic: "Format et schéma du registre des producteurs (interopérabilité)",
       type: "Actes d'exécution", base: "art_44", due: "2026-08-12",
-      status: "inprogress", note: "Spécifications d'enregistrement et d'échange de données entre registres nationaux." },
+      status: "review", note: "Le registre national doit être établi dans les 18 mois suivant l'entrée en vigueur du premier acte d'exécution adopté au titre de l'article 44(14) ; il ne s'agit pas d'une échéance fixe au 12/08/2026.", source: "https://eur-lex.europa.eu/eli/reg/2025/40/oj" },
     { topic: "Normes harmonisées (CEN) : réutilisabilité, minimisation, méthodes d'essai",
       type: "Mandat de normalisation", base: "art_36", due: null,
-      status: "inprogress", note: "Présomption de conformité lorsque les normes harmonisées seront publiées au JO (EN 13428 en révision)." },
+      status: "inprogress", note: "La présomption de conformité dépend de la publication des références des normes harmonisées au Journal officiel ; aucune date d'entrée en vigueur ne doit être inventée.", source: "https://eur-lex.europa.eu/eli/reg/2025/40/oj" },
     { topic: "Seuils « substance préoccupante » (PFAS et autres)",
       type: "Acte délégué", base: "art_5", due: null,
-      status: "expected", note: "Délégation pour fixer les seuils de concentration ; à surveiller au JO." },
+      status: "expected", note: "Délégation permettant de préciser les seuils de concentration ; à suivre dans le registre des actes délégués et au Journal officiel.", source: "https://eur-lex.europa.eu/eli/reg/2025/40/oj" },
     { topic: "Exigences détaillées biosourcé (méthode de calcul, certification)",
       type: "Acte délégué", base: "art_8", due: null,
-      status: "expected", note: "Fixera les parts minimales de matières biosourcées et leur vérification." }
+      status: "expected", note: "Fixera les parts minimales de matières biosourcées et les modalités de vérification.", source: "https://eur-lex.europa.eu/eli/reg/2025/40/oj" },
+    { topic: "Exemption de certains opérateurs utilisant des films étirables et sangles de palettes",
+      type: "Acte délégué", base: "art_29", due: null,
+      status: "adopted", note: "Décision déléguée (UE) 2026/429 adoptée le 25/02/2026 et publiée au JO le 06/05/2026 ; acte en vigueur.", source: "https://eur-lex.europa.eu/legal-content/FR/TXT/?uri=CELEX:32026D0429" }
   ]
 };
 
@@ -153,27 +158,29 @@ window.PPWR_META.en = {
       desc: "The Commission asks European standardisation organisations to prepare harmonised standards for home-compostable packaging.", refs: ["art_9"] },
     { date: "2026-08-12", major: true, title: "REGULATION BECOMES APPLICABLE",
       desc: "The regulation applies across all Member States. Implementing acts on harmonised labelling are expected around this date.", refs: ["art_71", "art_12"] },
-    { date: "2027-01-31", major: false, title: "Packaging format guidelines",
-      desc: "Guidelines explaining Annex V (restricted formats), issued in consultation with Member States and EFSA.", refs: ["art_25"] },
+    { date: "2026-12-31", major: false, title: "Plastic recycled-content acts",
+      desc: "Deadline provided for implementing and delegated acts on calculating, verifying and setting sustainability criteria for recycled plastic content. This deadline does not by itself set the operator compliance date.", refs: ["art_7"] },
     { date: "2027-02-12", major: false, title: "European Observatory on Re-use",
       desc: "Establishment of an observatory tracking implementation and collecting re-use practice data.", refs: ["art_31"] },
-    { date: "2028-08-12", major: true, title: "Harmonised labelling mandatory",
-      desc: "Packaging placed on the market carries the harmonised label: material identification, sorting instructions, pictograms, substances of concern, EPR QR code.", refs: ["art_12", "art_13"] },
+    { date: "2027-06-30", major: false, title: "Method for calculating re-use targets",
+      desc: "The Commission adopts the implementing act establishing the calculation method for re-use targets. The demonstration obligation may begin 18 months after its entry into force if later.", refs: ["art_30"] },
+    { date: "2028-08-12", major: true, title: "Harmonised labelling deadline",
+      desc: "Harmonised labelling applies from 12 August 2028 or 24 months after the relevant implementing acts enter into force, whichever is later.", refs: ["art_12", "art_13"] },
     { date: "2029-02-12", major: false, title: "Article 67(5) applies",
       desc: "Start of application of the provisions amending Directive (EU) 2019/904 introduced by the PPWR.", refs: ["art_67"] },
     { date: "2030-01-01", major: true, title: "Major deadline: packaging conformity",
       items: [
-        ["Recyclability grades A/B/C mandatory for market access", "art_6"],
-        ["Minimum recycled content: 30% contact-sensitive PET, 10% other contact-sensitive plastics, 30% single-use beverage bottles, 35% other plastic packaging", "art_7"],
+        ["Packaging outside recyclability grades A, B or C may no longer be placed on the market, subject to the mechanism linked to the entry into force of the delegated acts", "art_6"],
+        ["Minimum recycled content: 30% contact-sensitive PET, 10% other contact-sensitive plastics, 30% single-use beverage bottles, 35% other plastic packaging — or three years after the implementing act if later", "art_7"],
         ["Re-use targets: 10% of takeaway beverage packaging", "art_29"],
         ["Ban on formats listed in Annex V: fresh fruit & veg < 1.5 kg, hotel miniatures…", "art_25"],
         ["Refill stations: effort to dedicate 10% of sales area > 400 m²", "art_28"],
-        ["Proof of achievement of re-use targets (calculation under Art. 30)", "art_30"],
+        ["Demonstration of re-use targets: from 2030 or 18 months after the methodological implementing act, if later", "art_30"],
         ["Prevention: -5% packaging waste per capita vs 2018", "art_43"]
       ] },
-    { date: "2035-01-01", major: true, title: "Recycling at scale & tighter criteria",
+    { date: "2035-01-01", major: true, title: "Recycling at scale & stronger prevention",
       items: [
-        ["Recyclability assessment also based on actual large-scale recycling rates", "art_6"],
+        ["The recycled-at-scale requirement applies, subject to a possible delay of up to five years after the relevant implementing act", "art_6"],
         ["Prevention: -10% packaging waste per capita vs 2018", "art_43"],
         ["Commission review of design-for-recycling exemptions", "art_6"]
       ] },
@@ -181,7 +188,7 @@ window.PPWR_META.en = {
       desc: "Only packaging graded at least class B for recyclability may be placed on the EU market.", refs: ["art_6"] },
     { date: "2040-01-01", major: true, title: "2040 targets",
       items: [
-        ["Higher recycled content: up to 65% (single-use beverage bottles and other plastic packaging), 50% contact plastics", "art_7"],
+        ["Recycled content: 50% contact-sensitive PET, 25% other contact-sensitive plastics, 65% single-use beverage bottles, 65% other plastic packaging", "art_7"],
         ["Beverage re-use: 40% (takeaway)", "art_29"],
         ["Prevention: -15% packaging waste per capita vs 2018", "art_43"]
       ] }
@@ -219,7 +226,7 @@ window.PPWR_META.en = {
       duties: [
         ["Do not make non-compliant packaging available; check DoC and marking", "art_19"],
         ["Offer refill: dedicate 10% of sales areas > 400 m² to refill stations from 2030", "art_28"],
-        ["Takeaway: offer a re-use option (10% in 2030, 40% in 2040) and inform consumers", "art_32"],
+        ["Takeaway: allow consumers to bring their own containers from 2027 and meet the re-use targets applicable to the sector", "art_32"],
         ["Re-use offer obligation for final distributors in takeaway sector", "art_33"],
         ["Act as manufacturer when repacking or selling under own brand", "art_21"]
       ] },
@@ -246,7 +253,7 @@ window.PPWR_META.en = {
     ["Grouped packaging", "Secondary packaging grouping several sales units.", "art_3"],
     ["Transport packaging", "Tertiary packaging facilitating handling and transport (crates, pallets).", "art_3"],
     ["Producer", "Anyone who first places packaging or packaged products on the national territory (manufacturer, importer, distance seller, filler).", "art_3"],
-    ["Recyclability (grades A/B/C)", "Ability of packaging to be designed for recycling and actually recycled at scale; graded A, B or C — below grade C, market access banned from 2030.", "art_6"],
+    ["Recyclability (grades A/B/C)", "Ability of packaging to meet design-for-recycling and, at the relevant stage, recycled-at-scale criteria; graded A, B or C, with application dates linked to the European acts.", "art_6"],
     ["Recycled content (PCR)", "Minimum share of material recovered from post-consumer plastic waste, averaged per plant and per year.", "art_7"],
     ["Substance of concern", "Substances (incl. PFAS) restricted in packaging above thresholds set by delegated act.", "art_5"],
     ["Minimisation", "Packaging weight and volume reduced to the minimum needed for functionality; double walls/false bottoms banned.", "art_10"],
@@ -261,24 +268,27 @@ window.PPWR_META.en = {
   acts: [
     { topic: "Uniform method for assessing recyclability & design-for-recycling criteria",
       type: "Delegated act", base: "art_6", due: "2028-01-01",
-      status: "inprogress", note: "Draft submitted for feedback in 2025; adoption expected for application from 01/01/2030." },
+      status: "inprogress", note: "Adoption deadline is 01/01/2028; the design criteria apply 24 months after the delegated acts enter into force.", source: "https://eur-lex.europa.eu/eli/reg/2025/40/oj" },
     { topic: "Harmonised packaging labelling (pictograms, QR, material identification method)",
       type: "Implementing act", base: "art_12", due: "2026-08-12",
-      status: "inprogress", note: "Must be published by 12/08/2026 at the latest; labelling applies from 12/08/2028." },
+      status: "review", note: "Adoption deadline passed on 12/08/2026; labelling applies 24 months after the relevant act enters into force if later than 12/08/2028.", source: "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:52026XC03084" },
     { topic: "Harmonised deposit-system symbol",
       type: "Implementing act", base: "art_12", due: "2026-08-12",
-      status: "inprogress", note: "Symbol affixed to deposit packaging and collection receptacles." },
+      status: "review", note: "Adoption deadline passed on 12/08/2026; publication status must be confirmed in the Official Journal.", source: "https://eur-lex.europa.eu/eli/reg/2025/40/oj" },
     { topic: "Producer register format & schema (interoperability)",
       type: "Implementing acts", base: "art_44", due: "2026-08-12",
-      status: "inprogress", note: "Specifications for registration and data exchange between national registers." },
+      status: "review", note: "National registers must be established within 18 months of the entry into force of the first implementing act adopted under Article 44(14); this is not a fixed 12/08/2026 deadline.", source: "https://eur-lex.europa.eu/eli/reg/2025/40/oj" },
     { topic: "Harmonised standards (CEN): reusability, minimisation, test methods",
       type: "Standardisation mandate", base: "art_36", due: null,
-      status: "inprogress", note: "Presumption of conformity once harmonised standards are cited in the OJ (EN 13428 under revision)." },
+      status: "inprogress", note: "The presumption of conformity depends on publication of harmonised-standard references in the Official Journal; no application date should be invented.", source: "https://eur-lex.europa.eu/eli/reg/2025/40/oj" },
     { topic: "\"Substance of concern\" thresholds (PFAS and others)",
       type: "Delegated act", base: "art_5", due: null,
-      status: "expected", note: "Empowers the Commission to set concentration thresholds; watch the OJ." },
+      status: "expected", note: "Delegation allowing the Commission to specify concentration thresholds; monitor the delegated-acts register and the Official Journal.", source: "https://eur-lex.europa.eu/eli/reg/2025/40/oj" },
     { topic: "Detailed bio-based requirements (calculation method, certification)",
       type: "Delegated act", base: "art_8", due: null,
-      status: "expected", note: "Will set minimum bio-based shares and verification rules." }
+      status: "expected", note: "Will set minimum bio-based shares and verification rules.", source: "https://eur-lex.europa.eu/eli/reg/2025/40/oj" },
+    { topic: "Exemption for certain operators using pallet wrappings and straps",
+      type: "Delegated act", base: "art_29", due: null,
+      status: "adopted", note: "Commission Delegated Decision (EU) 2026/429 adopted on 25/02/2026 and published in the OJ on 06/05/2026; in force.", source: "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:32026D0429" }
   ]
 };
