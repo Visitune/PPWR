@@ -397,7 +397,7 @@ function bindRegister(r) {
     result.hidden = true;
     try {
       const index = await loadRegisterIndex();
-      const entry = (index.entries || []).find(x => x.type === kind && String(x.id).toUpperCase() === number);
+      const entry = (index.entries || []).find(x => x.type === kind && String(x.id).replace(/[\s-]/g, "").toUpperCase() === number);
       result.hidden = false;
       if (entry) {
         const fields = entry.fields || {};
