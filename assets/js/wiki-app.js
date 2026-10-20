@@ -24,7 +24,7 @@ const ICONS = {
 const T = {
   fr: {
     appName: "Wiki PPWR", appSub: "Règlement (UE) 2025/40", searchPh: "Rechercher un article, un mot-clé…",
-    home: "Accueil", tools: "Outils", related: "Textes liés", timeline: "Échéances réglementaires",
+    home: "Accueil", tools: "Outils", related: "Textes liés", timeline: "Échéances réglementaires", register: "Vérifier un site de recyclage",
     actors: "Vues métiers", glossary: "Glossaire", acts: "Suivi des actes et normes",
     toc: "Sommaire", recitals: "Préambule — considérants", annexes: "Annexes",
     officialText: "Texte officiel sur EUR-Lex", pdf: "PDF",
@@ -42,7 +42,7 @@ const T = {
   },
   en: {
     appName: "PPWR Wiki", appSub: "Regulation (EU) 2025/40", searchPh: "Search an article, keyword…",
-    home: "Home", tools: "Tools", related: "Related texts", timeline: "Regulatory deadlines",
+    home: "Home", tools: "Tools", related: "Related texts", timeline: "Regulatory deadlines", register: "Check a recycling site",
     actors: "Business views", glossary: "Glossary", acts: "Acts and standards tracker",
     toc: "Table of contents", recitals: "Preamble — recitals", annexes: "Annexes",
     officialText: "Official text on EUR-Lex", pdf: "PDF",
@@ -179,6 +179,7 @@ function buildSidebar(route) {
     });
     h += "</div></div>";
     h += link(L.glossary, "#/" + route.lang + "/glossary", route.lang + "/glossary///");
+    h += link(L.register, "#/" + route.lang + "/register", route.lang + "/register///");
     h += link(L.acts, "#/" + route.lang + "/acts", route.lang + "/acts///");
     return h + "</div></div>";
   }
@@ -320,6 +321,74 @@ function vGlossary(r) {
       <div class="gloss-def">${linkify(esc(x[1]), r.lang)}</div>
       <div style="margin-top:8px"><a class="badge gray" style="text-decoration:none" href="#/${r.lang}/doc/ppwr/${x[2]}">${x[2].replace("art_", "art. ")}</a></div>
     </div></div>`).join("")}</div>`;
+}
+
+function vRegister(r) {
+  const fr = r.lang === "fr";
+  const official = "https://food.ec.europa.eu/food-safety/chemical-safety/food-contact-materials/plastic-recycling_en";
+  const fip = "https://ec.europa.eu/food/food-feed-portal/screen/home";
+  return `<section class="register-hero">
+    <span class="badge blue">${fr ? "Registre de l'Union — règlement (UE) 2022/1616" : "Union Register — Regulation (EU) 2022/1616"}</span>
+    <h1>${fr ? "Vérifier un site de recyclage plastique" : "Check a plastic recycling site"}</h1>
+    <p>${fr ? "Utilisez le numéro officiel publié par la Commission pour retrouver un opérateur, une installation ou un site de recyclage. Cet outil contrôle le format puis vous dirige vers la source officielle." : "Use the official number published by the Commission to find an operator, facility or recycling installation. This tool checks the format and then directs you to the official source."}</p>
+  </section>
+  <div class="register-notice">
+    <strong>${fr ? "État du registre au 20 octobre 2026" : "Register status on 20 October 2026"}</strong>
+    <span>${fr ? "La Commission indique que la liste publique reste en ligne, mais que les données sont gelées depuis le 11 septembre 2026 pendant une migration. Le résultat final doit donc toujours être confirmé directement dans le portail FIP." : "The Commission says that the public list remains online, but data has been frozen since 11 September 2026 during a migration. The final result must therefore always be confirmed directly in the FIP portal."}</span>
+  </div>
+  <div class="card register-card"><div class="card-body">
+    <form id="registerForm" novalidate>
+      <div class="register-grid">
+        <label><span>${fr ? "Type de référence" : "Reference type"}</span>
+          <select id="registerType">
+            <option value="ron">RON — ${fr ? "opérateur de recyclage" : "recycling operator"}</option>
+            <option value="rfn">RFN — ${fr ? "installation/facilité de recyclage" : "recycling facility"}</option>
+            <option value="rin">RIN — ${fr ? "installation de recyclage" : "recycling installation"}</option>
+          </select>
+        </label>
+        <label><span>${fr ? "Numéro officiel (9 chiffres)" : "Official number (9 digits)"}</span>
+          <input id="registerNumber" inputmode="numeric" autocomplete="off" placeholder="Ex. 123456789" maxlength="11" required>
+        </label>
+      </div>
+      <div class="register-actions">
+        <button class="btn-primary" type="submit">${fr ? "Vérifier dans le registre officiel" : "Check the official register"}</button>
+        <a class="extlink" target="_blank" rel="noopener" href="${fip}">${ICONS.ext} ${fr ? "Ouvrir le portail FIP" : "Open the FIP portal"}</a>
+      </div>
+      <p id="registerMessage" class="register-message" role="status" aria-live="polite"></p>
+    </form>
+  </div></div>
+  <div id="registerResult" class="register-result" hidden></div>
+  <div class="grid cols-2 register-links">
+    <div class="card"><div class="card-body"><h3>${fr ? "Comment lire le résultat" : "How to read the result"}</h3><p>${fr ? "Une référence valide respecte le format à 9 chiffres. Seule la fiche officielle du FIP permet ensuite de confirmer le nom, le pays, le statut et les éventuelles installations liées." : "A valid reference follows the 9-digit format. Only the official FIP record can then confirm the name, country, status and any linked facilities."}</p></div></div>
+    <div class="card"><div class="card-body"><h3>${fr ? "Sources réglementaires" : "Regulatory sources"}</h3><p><a class="extlink" target="_blank" rel="noopener" href="${official}">${ICONS.ext} ${fr ? "Page de la Commission sur le recyclage plastique" : "Commission plastic recycling page"}</a></p></div></div>
+  </div>`;
+}
+
+function bindRegister(r) {
+  const form = $("#registerForm");
+  if (!form) return;
+  const input = $("#registerNumber"), type = $("#registerType"), message = $("#registerMessage"), result = $("#registerResult");
+  form.addEventListener("submit", e => {
+    e.preventDefault();
+    const raw = input.value.trim();
+    const number = raw.replace(/[\s-]/g, "");
+    const fr = r.lang === "fr";
+    if (!/^\d{9}$/.test(number)) {
+      message.className = "register-message error";
+      message.textContent = fr ? "Format non valide : saisissez exactement 9 chiffres (les espaces et tirets sont ignorés)." : "Invalid format: enter exactly 9 digits (spaces and hyphens are ignored).";
+      result.hidden = true;
+      input.focus();
+      return;
+    }
+    const kind = type.value.toUpperCase();
+    const labels = { RON: fr ? "opérateur" : "operator", RFN: fr ? "installation/facilité" : "facility", RIN: fr ? "installation" : "installation" };
+    const urls = { RON: "https://ec.europa.eu/food/food-feed-portal/screen/fcm/ron", RFN: "https://ec.europa.eu/food/food-feed-portal/screen/fcm/rfn", RIN: "https://ec.europa.eu/food/food-feed-portal/screen/fcm/rin" };
+    message.className = "register-message success";
+    message.textContent = fr ? `Référence ${kind} reconnue. Ouverture de la recherche officielle…` : `${kind} reference recognised. Opening the official search…`;
+    result.hidden = false;
+    result.innerHTML = `<strong>${fr ? "Vérification à terminer dans la source officielle" : "Verification to be completed in the official source"}</strong><p>${fr ? `Le format de ${kind} ${number} est correct pour un(e) ${labels[kind]}. Le registre officiel doit maintenant confirmer que cette référence existe et afficher son statut.` : `The format of ${kind} ${number} is valid for a ${labels[kind]}. The official register must now confirm that this reference exists and display its status.`}</p><a class="btn-primary" target="_blank" rel="noopener" href="${urls[kind]}">${ICONS.ext} ${fr ? `Rechercher ${kind} ${number} dans le FIP` : `Search ${kind} ${number} in FIP`}</a>`;
+    window.open(urls[kind], "_blank", "noopener");
+  });
 }
 
 function vActs(r) {
@@ -534,6 +603,7 @@ function render() {
     case "actors": html = vActors(r); break;
     case "actor": html = vActor(r, r.p1); break;
     case "glossary": html = vGlossary(r); break;
+    case "register": html = vRegister(r); break;
     case "acts": html = vActs(r); break;
     case "doc": html = vItem(r, r.p1, r.p2 || "toc"); break;
     default: html = vHome(r);
@@ -554,12 +624,13 @@ function render() {
       if (it) crumbs.push(`<b>${esc(it.num || it.id)}${it.title ? " · " + esc(it.title) : ""}</b>`);
     }
   } else if (r.view !== "home") {
-    const lbl = { timeline: T[r.lang].timeline, actors: T[r.lang].actors, actor: T[r.lang].actors, glossary: T[r.lang].glossary, acts: T[r.lang].acts }[r.view];
+    const lbl = { timeline: T[r.lang].timeline, actors: T[r.lang].actors, actor: T[r.lang].actors, glossary: T[r.lang].glossary, register: T[r.lang].register, acts: T[r.lang].acts }[r.view];
     crumbs.push(`<b>${esc(lbl || r.view)}</b>`);
   }
   $("#crumbs").innerHTML = crumbs.join('<span>›</span>');
 
   buildSidebar(r);
+  if (r.view === "register") bindRegister(r);
 
   // favorite button binding
   const fb = $("#favBtn");

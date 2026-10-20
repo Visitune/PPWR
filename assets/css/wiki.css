@@ -234,6 +234,29 @@ mark{background:rgba(251,191,36,.45);color:inherit;border-radius:3px;padding:0 2
 .crumbs-page{font-size:13px;margin-bottom:6px}
 .xref{font-weight:600}
 
+/* official recycling register tool */
+.register-hero{background:linear-gradient(135deg,#071a2e 0%,#123a52 62%,#075e68 100%);color:#fff;border-radius:var(--r-lg);padding:28px 30px;margin-bottom:14px;box-shadow:var(--sh-md)}
+.register-hero h1{font-size:25px;line-height:1.2;margin:12px 0 8px;letter-spacing:-.02em}
+.register-hero p{max-width:760px;color:rgba(255,255,255,.82);font-size:14px;line-height:1.65;margin:0}
+.register-notice{display:flex;gap:10px;align-items:flex-start;background:rgba(251,191,36,.12);border:1px solid rgba(251,191,36,.45);border-radius:var(--r-md);padding:13px 16px;margin-bottom:14px;color:var(--text-2);font-size:13px;line-height:1.5}
+.register-notice strong{color:#b45309;white-space:nowrap}
+[data-theme="dark"] .register-notice strong{color:var(--ifs-amber)}
+.register-card{margin-bottom:14px}
+.register-grid{display:grid;grid-template-columns:minmax(220px,.8fr) minmax(240px,1.2fr);gap:14px}
+.register-grid label{display:flex;flex-direction:column;gap:6px;color:var(--text-2);font-size:12.5px;font-weight:700}
+.register-grid input,.register-grid select{width:100%;padding:10px 12px;border:1px solid var(--border-strong);border-radius:var(--r-sm);background:var(--surface);color:var(--text);font:inherit;font-weight:500;outline:none}
+.register-grid input:focus,.register-grid select:focus{border-color:var(--ifs-accent);box-shadow:0 0 0 3px rgba(0,180,216,.14)}
+.register-actions{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:16px}
+.btn-primary{display:inline-flex;align-items:center;gap:7px;border:0;border-radius:var(--r-sm);padding:10px 14px;background:var(--ifs-accent);color:#042333;font:inherit;font-size:13px;font-weight:800;cursor:pointer;text-decoration:none;transition:all var(--t)}
+.btn-primary:hover{background:var(--ifs-accent-light);transform:translateY(-1px);text-decoration:none}
+.register-message{min-height:19px;margin:10px 0 0;font-size:12.5px;color:var(--text-muted)}
+.register-message.error{color:var(--ifs-coral)}
+.register-message.success{color:var(--ifs-teal)}
+.register-result{border-left:4px solid var(--ifs-teal);background:rgba(0,201,167,.09);border-radius:0 var(--r-md) var(--r-md) 0;padding:16px 18px;margin-bottom:14px;color:var(--text-2);font-size:13.5px;line-height:1.55}
+.register-result strong{display:block;color:var(--text);margin-bottom:4px}
+.register-result p{margin:0 0 12px}
+.register-links h3{font-size:14px;margin:0 0 7px}.register-links p{font-size:13px;color:var(--text-2);line-height:1.55;margin:0}.register-links .extlink{margin-top:4px}
+
 /* content polish */
 .card,.tl-card,.pager a{transition:border-color var(--t),box-shadow var(--t),transform var(--t)}
 .card:hover{border-color:color-mix(in srgb,var(--border-strong) 70%,var(--ifs-accent))}
@@ -258,6 +281,7 @@ mark{background:rgba(251,191,36,.45);color:inherit;border-radius:3px;padding:0 2
   .card-head,.card-body{padding-left:16px;padding-right:16px}
   .pager{flex-direction:column}
   .pager .next{text-align:left}
+  .register-hero{padding:24px 20px}.register-hero h1{font-size:22px}.register-grid{grid-template-columns:1fr}.register-notice{flex-direction:column}.register-notice strong{white-space:normal}
 }
 .scrim{display:none;position:fixed;inset:0;background:rgba(2,8,20,.55);z-index:45}
 
